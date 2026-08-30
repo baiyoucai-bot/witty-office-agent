@@ -1,5 +1,5 @@
 [project]
-name = "witty-agent"
+name = "witty-office-agent"
 version = "0.1.0"
 description = "面向办公场景的通用智能体底座：技能、工具、审批、记忆、沙箱与自进化"
 readme = "README.md"
@@ -46,6 +46,10 @@ classify = [
 [build-system]
 requires = ["uv_build>=0.9.18,<0.10.0"]
 build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# 发行名 witty-office-agent（GitHub/PyPI 检索用），导入名保持简短的 witty_agent
+module-name = "witty_agent"
 
 [tool.uv]
 compile-bytecode = true

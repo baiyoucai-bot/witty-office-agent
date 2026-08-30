@@ -494,7 +494,7 @@ wheels = [
 ]
 
 [[package]]
-name = "witty-agent"
+name = "witty-office-agent"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

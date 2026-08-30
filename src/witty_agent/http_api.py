@@ -125,7 +125,7 @@ def package_version() -> str:
     from importlib.metadata import PackageNotFoundError, version
 
     try:
-        return version("witty-agent")
+        return version("witty-office-agent")
     except PackageNotFoundError:
         pass
     pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"

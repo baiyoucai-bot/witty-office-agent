@@ -1,4 +1,4 @@
-# Witty Agent
+# Witty Office Agent
 
 **面向办公场景的通用智能体底座（Python）。**
 技能可插拔、提示词全配置、危险操作先审批、代码执行进沙箱；一套内核，三种用法：Python 库、HTTP 服务、桌面应用。
@@ -91,8 +91,10 @@ Windows 一键安装器（自带 Python 与依赖）用 `uv run python scripts/b
 ## 当作 Python 库
 
 ```bash
-uv pip install -e /path/to/witty_agent          # 或打 wheel 固定版本
+uv pip install -e /path/to/witty-office-agent   # 或打 wheel 固定版本
 ```
+
+发行名是 `witty-office-agent`，导入名仍是简短的 `witty_agent`，命令行是 `witty-agent`。
 
 ```python
 from witty_agent import Witty

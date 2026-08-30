@@ -384,7 +384,7 @@ class DesktopSurfaceTests(unittest.IsolatedAsyncioTestCase):
                 demo = next(item for item in body["skills"] if item["name"] == "desk-demo")
                 self.assertEqual(demo["network"], "general")
                 self.assertEqual(demo["network_label"], "通用")
-                ppt = next(item for item in body["skills"] if item["name"] == "ppt-master")
+                ppt = next(item for item in body["skills"] if item["name"] == "witty-ppt-skills")
                 self.assertEqual(ppt["network"], "intranet")
                 self.assertEqual(ppt["network_label"], "内网")
                 status, detail = await handle_request("GET", "/v1/skills/desk-demo")

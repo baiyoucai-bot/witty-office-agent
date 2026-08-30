@@ -8,7 +8,7 @@ network: general
 
 做汇报/评审用的 **HTML 或 Markdown** 草稿，路径由用户指定。
 
-用户要 **可编辑 .pptx / PowerPoint** 时切到 `ppt-master`，不要在这里手写 Office 文件。
+用户要 **可编辑 .pptx / PowerPoint** 时切到 `witty-ppt-skills`，不要在这里手写 Office 文件。
 
 ## 开始前
 

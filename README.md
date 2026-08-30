@@ -35,7 +35,7 @@
 | **持久解释器** | `python_repl` 工具的变量跨工具调用存活：读一次大表，后续轮次直接用，不重复读盘 |
 | **证伪账本** | 失败过的动作（文件不存在等）在证据没变时直接拦下重试，不烧第二遍 token |
 | **转圈检测** | 同一调用重复到阈值先提醒后停轮，「重复」不要求连续，只读调用洗不掉计数 |
-| **可编辑 PPT 生产线** | `ppt-master` 产出真 .pptx：声明式 flex 排版（不让模型手算坐标）、原生矢量形状（流程图/架构图在 WPS/PowerPoint 里可改）、光栅自查防瞎交稿 |
+| **可编辑 PPT 生产线** | `witty-ppt-skills` 产出真 .pptx：声明式 flex 排版（不让模型手算坐标）、原生矢量形状（流程图/架构图在 WPS/PowerPoint 里可改）、光栅自查防瞎交稿 |
 | **证据驱动长文工程** | `long-document` 把几万字报告当工程写：锁提纲、样章先行、来源账 `[cite:]`、数字账 `[num:]`、跨章交接、确定性校验脚本、Word 导出带目录和交叉引用 |
 | **红头公文** | `word-docx` 按 GB/T 9704 版式生成红头文件：份号、密级、发文字号、版记，字体字号间距按规程 |
 | **自然语言问数** | `nl2sql` 系列技能：读 schema、生成带行数上限的 SQL、结果聚类定置信度、按问题类型分级出图 |
@@ -60,14 +60,14 @@
 | 类别 | 技能 |
 |------|------|
 | 文档 | `long-document`（可研/详设/概设长文工程）、`word-docx`（公文/题注/交叉引用/长文导出）、`office-document`（纪要/公函/老格式转换）、`pdf-extract`（表格/OCR/填表）、`excel-xlsx`（公式/图表/条件格式）、`doc-qa`、`table-qa` |
-| 演示 | `ppt-master`（可编辑 PPTX 生产稿）、`slides`（HTML/Markdown 演示） |
+| 演示 | `witty-ppt-skills`（可编辑 PPTX 生产稿）、`slides`（HTML/Markdown 演示） |
 | 数据 | `nl2sql` / `nl2sql-schema` / `nl2sql-sql` / `nl2sql-deliver`（问数四段式）、`data-analysis` |
 | 信息流 | `mail-desk`（IMAP/SMTP 邮件）、`agenda-digest`（日程摘要）、`week-digest`（周报）、`daily-diary`（行为日记）、`link-box`（链接库）、`llm-wiki`（工作区知识库） |
 | 归档 | `file-classify`（目录资料分类） |
 | 创作 | `novel-to-video`（小说转分镜文案） |
-| 元能力 | `agent-creation` / `agent-evaluation` / `agent-optimization` / `benchmark-design`（造 agent、评 agent、优化 agent）、`skill-porting`、`session-health`、`generation-ui`、`software-engineering` |
+| 元能力 | `agent-creation` / `agent-evaluation` / `agent-optimization` / `benchmark-design`（造 agent、评 agent、优化 agent）、`find-skills`（从 [skills.sh](https://skills.sh) 生态搜索并安装社区技能）、`skill-porting`、`session-health`、`generation-ui`、`software-engineering` |
 
-**场景举例**：产品经理用 `long-document` 写需求文档、`slides` 出评审材料、`nl2sql` 直接对埋点库问数，九宫格替他记住每次评审拍板的结论；教师用 `ppt-master` + `long-document` 出课件和讲义，用 `data-analysis` 批改成绩分布；律师用 `doc-qa` 问案卷、`file-classify` 归档卷宗、`word-docx` 出规范文书；行政用 `office-document` + `mail-desk` + `week-digest` 处理纪要邮件周报。
+**场景举例**：产品经理用 `long-document` 写需求文档、`slides` 出评审材料、`nl2sql` 直接对埋点库问数，九宫格替他记住每次评审拍板的结论；教师用 `witty-ppt-skills` + `long-document` 出课件和讲义，用 `data-analysis` 批改成绩分布；律师用 `doc-qa` 问案卷、`file-classify` 归档卷宗、`word-docx` 出规范文书；行政用 `office-document` + `mail-desk` + `week-digest` 处理纪要邮件周报。
 
 技能怎么写、怎么校验，见 [`skills/README.md`](skills/README.md)；提交前跑 `uv run python scripts/check_skills.py`。
 
@@ -144,6 +144,7 @@ print(result.tools)                   # 用过的工具与结果
 | 技能 | `skills/<name>/SKILL.md` | 目录名 = frontmatter `name`，小写-连字符；`WITTY_SKILLS_PATH` 加目录 |
 | 工具 | `@tool` 装饰的函数 | `[tools].packages` 按包扫描；内核工具名不可占用 |
 | 密钥 | 环境变量 / 桌面保险柜 | `WITTY_API_KEY`（后备 `OPENAI_API_KEY`）；桌面存 vault，serve 启动时补进环境 |
+| 网络搜索 | `[web]` + 环境变量 | `web_search` 工具：默认 Tavily（`WITTY_SEARCH_API_KEY`，后备 `TAVILY_API_KEY`）；内网可改 `search_provider = "searxng"` 指自建实例，免 key |
 
 数据落点：全局 `WITTY_HOME`（默认 `~/.witty/data`，放项目、保险柜、沙箱、审批收件箱）→ 项目（租户）→ 工作区（调用方 cwd）。密钥永远不落工作区。
 

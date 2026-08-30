@@ -4,7 +4,7 @@
     <沙箱 Python> convert_legacy.py --input 甲.doc 乙.xls --outdir 目录
 
 用本机 LibreOffice headless 转（本机没有 soffice，命令是 libreoffice）。
-转出的新文件再交给 word-docx / excel-xlsx / ppt-master 的脚本处理；
+转出的新文件再交给 word-docx / excel-xlsx / witty-ppt-skills 的脚本处理；
 本脚本只转格式，不改内容，转完自己核对一眼。
 
 退出码 0 全部转出；2 没有 LibreOffice / 不认识的扩展名 / 转换失败。

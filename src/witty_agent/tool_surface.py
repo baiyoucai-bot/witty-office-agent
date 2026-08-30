@@ -110,7 +110,7 @@ _GROUPS: tuple[tuple[re.Pattern[str], frozenset[str]], ...] = (
         frozenset({"week_digest"}),
     ),
     (
-        re.compile(r"ppt|pptx|幻灯片|演示文稿|ppt-master|\bpptx_|powerpoint", re.IGNORECASE),
+        re.compile(r"ppt|pptx|幻灯片|演示文稿|witty-ppt-skills|\bpptx_|powerpoint", re.IGNORECASE),
         frozenset(
             {
                 "pptx_create",
@@ -190,7 +190,7 @@ _SPAWN = frozenset({"run_subagent", "run_fanout", "input_subagent"})
 _PLAN = frozenset({"exit_plan_mode", "plan_read", "plan_write"})
 _LOOKUP_TOOLS = frozenset({"find", "grep", "ls", "read"})
 _ASK = frozenset({"ask_user_question"})
-_WEB = frozenset({"web_fetch"})
+_WEB = frozenset({"web_fetch", "web_search"})
 _TODO = frozenset({"todo_write"})
 _SKILL = frozenset({"list_available_skills", "skill"})
 _MEMORY = frozenset({"memory_read", "memory_status", "memory_write"})

@@ -53,7 +53,7 @@ metadata:
 
 试验脚本和中间产物写沙箱（路径用 `sandbox/…`），用沙箱 Python 跑，预装 numpy / pandas / openpyxl / matplotlib。交付物写用户指定的路径。
 
-要改 `.xlsx` 工作簿、保住公式走 `excel-xlsx`。要写成报告、纪要走 `office-document`；要网页演示走 `slides`；要可编辑 pptx 走 `ppt-master`。本技能只出分析和数据产物。
+要改 `.xlsx` 工作簿、保住公式走 `excel-xlsx`。要写成报告、纪要走 `office-document`；要网页演示走 `slides`；要可编辑 pptx 走 `witty-ppt-skills`。本技能只出分析和数据产物。
 
 ## 核查
 

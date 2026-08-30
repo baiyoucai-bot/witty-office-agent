@@ -11,7 +11,7 @@ metadata:
 几万字的工作文档当成**工程**写，不当成一次模型输出。可研、详设、概设只是章节清单（profile），循环相同。
 
 一页纪要 / 公函走 `office-document`；红头文件走 `word-docx` 的 `gongwen.py`。
-成稿后用户要可编辑汇报 PPT：切 `ppt-master`，数字只认本报告，优先整份 `pptx_render`。
+成稿后用户要可编辑汇报 PPT：切 `witty-ppt-skills`，数字只认本报告，优先整份 `pptx_render`。
 
 写法借鉴了公开案例，但只收**通用循环**，不收它们的产品壳：Stanford STORM / GPT-researcher 的「先锁提纲再按节扩写 + 来源账」；Karpathy LLM Wiki 的「工作区即真相」；Anthropic 办公技能的「确定性脚本抓静默失败」；学术综述的证据驱动写法「开写前盘料、样章先行、缺证据定向回补、整合审计、正文锁定后再制图」。不引入多角色调研团、不默认上网检索、不收投稿/期刊那套壳。依据见 `references/method.md`。
 

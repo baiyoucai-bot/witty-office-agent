@@ -10,7 +10,7 @@ metadata:
 
 产出 **Word / WPS 里能改字、能重排的 `.docx`**，且版式经得起量。
 
-要 md / html / 纯文本草稿走 `office-document`；可研 / 详设 / 分章长文先走 `long-document` 再回这里导出；要可编辑 pptx 走 `ppt-master`；要网页演示走 `slides`。本技能只出 `.docx`。
+要 md / html / 纯文本草稿走 `office-document`；可研 / 详设 / 分章长文先走 `long-document` 再回这里导出；要可编辑 pptx 走 `witty-ppt-skills`；要网页演示走 `slides`。本技能只出 `.docx`。
 
 ## 开始前
 

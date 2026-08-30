@@ -9,14 +9,14 @@ network: general
 写或改**短**办公文书：纪要、函、一页报告、表。只产出被要求的文件，不要发明制度条文或未提供的数据。
 
 可研、详设、概设、分章长文走 `long-document`。红头公文走 `word-docx`。
-用户要把已写好的 Word/可研做成可编辑汇报 PPT：切到 `ppt-master`（政企题材默认 grid，整稿一次渲，不要连环追问页数）。
+用户要把已写好的 Word/可研做成可编辑汇报 PPT：切到 `witty-ppt-skills`（政企题材默认 grid，整稿一次渲，不要连环追问页数）。
 老格式 `.doc` / `.xls` / `.ppt` / `.wps` / `.et` / `.dps` / `.rtf` 先转再交给对应技能：
 
 ```bash
 <沙箱 Python> <技能目录>/scripts/convert_legacy.py --input 老.doc --outdir 目录
 ```
 
-用本机 `libreoffice --headless`（没有 `soffice`）。转完自己核一眼，再走 `word-docx` / `excel-xlsx` / `ppt-master`。
+用本机 `libreoffice --headless`（没有 `soffice`）。转完自己核一眼，再走 `word-docx` / `excel-xlsx` / `witty-ppt-skills`。
 
 ## 开始前
 

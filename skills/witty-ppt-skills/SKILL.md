@@ -1,10 +1,12 @@
 ---
-name: ppt-master
-description: 在本地生成可编辑的 .pptx / PowerPoint 生产稿。用户点名 pptx、powerpoint、ppt-master、可编辑PPT，或把 Word/可研长文转成 PPT 生产稿时使用。按用户指定风格现场排版，不要套死模板。不要用于纯 HTML/Markdown 演示草稿。不调用公网美化。
+name: witty-ppt-skills
+description: 在本地生成可编辑的 .pptx / PowerPoint 生产稿。用户点名 pptx、powerpoint、witty-ppt-skills、可编辑PPT，或把 Word/可研长文转成 PPT 生产稿时使用。按用户指定风格现场排版，不要套死模板。不要用于纯 HTML/Markdown 演示草稿。不调用公网美化。
 network: intranet
+metadata:
+  triggers: ppt pptx powerpoint 可编辑ppt witty-ppt-skills
 ---
 
-# PPT Master
+# Witty PPT Skills
 
 产出 **WPS / Office 里能改字、改表、换图** 的 `.pptx`。风格和版式按**这一次用户要求**现场发明，不要先从内置主题里挑一套。
 

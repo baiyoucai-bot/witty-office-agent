@@ -71,7 +71,7 @@ class IntranetPluginTests(unittest.IsolatedAsyncioTestCase):
 
     def test_new_skills_and_tools_are_pluggable(self) -> None:
         names = {item.name for item in list_skills()}
-        self.assertTrue({"mail-desk", "link-box", "daily-diary", "ppt-master", "llm-wiki"} <= names)
+        self.assertTrue({"mail-desk", "link-box", "daily-diary", "witty-ppt-skills", "llm-wiki"} <= names)
         tools = {item.name for item in list_tools()}
         self.assertTrue(
             {

@@ -518,6 +518,9 @@ def web_settings(*, root: Path | None = None) -> dict[str, Any]:
         "allow_private": bool(table.get("allow_private", True)),
         "deny_public": deny_public,
         "mode": "intranet" if deny_public else "public",
+        "search_provider": str(table.get("search_provider") or "tavily").strip().casefold(),
+        "search_base_url": str(table.get("search_base_url") or "").strip(),
+        "search_max_results": int(table.get("search_max_results") or 5),
     }
 
 

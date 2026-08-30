@@ -35,7 +35,7 @@ class SkillsToolsTests(unittest.TestCase):
 
     def test_builtin_skill_network_tags(self) -> None:
         by_name = {item.name: item for item in list_skills()}
-        self.assertEqual(by_name["ppt-master"].network, "intranet")
+        self.assertEqual(by_name["witty-ppt-skills"].network, "intranet")
         self.assertEqual(by_name["excel-xlsx"].network, "intranet")
         self.assertEqual(by_name["pdf-extract"].network, "intranet")
         self.assertEqual(by_name["long-document"].network, "general")
@@ -45,7 +45,7 @@ class SkillsToolsTests(unittest.TestCase):
         self.assertEqual(by_name["software-engineering"].network, "general")
         self.assertEqual(by_name["slides"].network, "general")
         self.assertEqual(by_name["llm-wiki"].network, "public")
-        loaded = load_skill("ppt-master")
+        loaded = load_skill("witty-ppt-skills")
         self.assertEqual(loaded.network, "intranet")
 
     def test_install_user_skill_from_dir_file_and_text(self) -> None:
@@ -181,7 +181,7 @@ Read the file then extract text.
         self.assertEqual(report, ["office-document"])
         zh_report = [item.name for item in match_relevant_skills("写一份报告")]
         self.assertEqual(zh_report, ["office-document"])
-        self.assertEqual([item.name for item in match_relevant_skills("做个PPT")], ["ppt-master"])
+        self.assertEqual([item.name for item in match_relevant_skills("做个PPT")], ["witty-ppt-skills"])
         self.assertEqual([item.name for item in match_relevant_skills("出一份汇报材料")], ["slides"])
         self.assertEqual([item.name for item in match_relevant_skills("看一下这个 csv")], ["data-analysis"])
         self.assertEqual([item.name for item in match_relevant_skills("写会议记录")], ["office-document"])
@@ -190,8 +190,8 @@ Read the file then extract text.
         self.assertEqual([item.name for item in match_relevant_skills("修一个 bug")], ["software-engineering"])
         self.assertEqual([item.name for item in match_relevant_skills("create an agent")], ["agent-creation"])
         self.assertEqual([item.name for item in match_relevant_skills("新建一个智能体")], ["agent-creation"])
-        self.assertEqual([item.name for item in match_relevant_skills("做一份pptx")], ["ppt-master"])
-        self.assertEqual([item.name for item in match_relevant_skills("用ppt-master出稿")], ["ppt-master"])
+        self.assertEqual([item.name for item in match_relevant_skills("做一份pptx")], ["witty-ppt-skills"])
+        self.assertEqual([item.name for item in match_relevant_skills("用witty-ppt-skills出稿")], ["witty-ppt-skills"])
         self.assertEqual([item.name for item in match_relevant_skills("看一下收件箱")], ["mail-desk"])
         self.assertEqual([item.name for item in match_relevant_skills("帮我回一封邮件")], ["mail-desk"])
         self.assertEqual([item.name for item in match_relevant_skills("维护我的链接库")], ["link-box"])

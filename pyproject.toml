@@ -1,0 +1,62 @@
+[project]
+name = "witty-agent"
+version = "0.1.0"
+description = "面向办公场景的通用智能体底座：技能、工具、审批、记忆、沙箱与自进化"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+    { name = "baiyoucai-bot", email = "58627702+baiyoucai-bot@users.noreply.github.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "fonttools>=4.63.0",
+    "pillow>=12.3.0",
+    "python-pptx>=1.0.2",
+    "tomli>=2.0.1; python_version < '3.11'",
+    "tzdata>=2024.1 ; sys_platform == 'win32'",
+]
+
+# 发 wheel 前：uv run python scripts/sync_package_data.py
+# 这样 config/ 与 skills/ 会打进 witty_agent/data/，跟着仓库变。
+
+[project.scripts]
+witty-agent = "witty_agent:main"
+
+[project.optional-dependencies]
+# 数据库驱动一律放 extra，不进上面的 dependencies：核心装完就能跑，问数是可选能力，
+# 装个底座不该顺带拖进 MySQL/PG 客户端。nl2sql 插件用 importlib 按字符串名找驱动，
+# 装了就用、没装就在回执里给出装法（见 prompts.toml 的 nl2sql_driver_install_*）。
+# 装法：uv sync --extra mysql；或装好的包 uv pip install --python <解释器> pymysql
+mysql = [
+    "pymysql>=1.1",
+]
+postgres = [
+    "psycopg[binary]>=3.1",
+]
+# 资料分类的正文抽取：第二轮要读 PDF/Word/Excel 才能定类型。同样是装了就用、
+# 没装就在正文摘录位置写明装法（见 prompts.toml 的 file_classify_excerpt_dep），
+# 不装也能跑，只是这几类文件只能靠路径和文件名判。装法：uv sync --extra classify
+classify = [
+    "openpyxl>=3.1.5",
+    "pypdf>=6.16.2",
+    "python-docx>=1.2.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.18,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv]
+compile-bytecode = true
+# 项目在外置卷上，和 uv cache 不在同一文件系统，无法 reflink
+link-mode = "copy"
+
+[[tool.uv.index]]
+name = "tsinghua"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
+
+[[tool.uv.index]]
+name = "aliyun"
+url = "https://mirrors.aliyun.com/pypi/simple/"

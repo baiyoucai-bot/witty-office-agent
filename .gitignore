@@ -1,0 +1,61 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+
+# Local env / secrets
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+.claude/
+
+# UI 截图夹具（npm run ui-shot 产物，改界面前看现状用，不参与验收）
+.ui-preview/
+
+# 私有维护账本与发布工作文档：不进公开仓。
+# 账本继续在本地/私有远端维护（AGENTS.md 的记账规则不变，文件仍在工作树里）。
+docs/change_maintenance/
+docs/OPEN_SOURCE_CHECKLIST.md
+
+# 上游对照源码，只本地阅读，不入库
+refs/
+
+# pip wheel 打包副本（源仍是仓库 config/、skills/）
+src/witty_agent/data/config/
+src/witty_agent/data/skills/
+src/witty_agent/data/SOURCE.txt
+
+# 对话里粘贴的图片
+.witty-inbox/
+
+# 日记/记忆落在 cwd 时的兜底目录。正常应落在 WITTY_HOME 下的 agent 记忆里，
+# 这里出现东西说明有调用方没传 memory_dir，别把它提交进仓库。
+.witty/
+
+# Electron 壳依赖与打包产物
+node_modules/
+apps/desktop/dist/
+apps/desktop/.electron-cache/
+
+# Windows 安装器构建（scripts/build_windows_installer.py）
+apps/desktop/build-win/
+apps/desktop/release/
+apps/desktop/.build-cache/
+apps/desktop/buildtools/package-lock.json
+# 注意：apps/desktop/build/（图标）被上面的全局 build/ 规则盖住，属预期——图标由脚本再生

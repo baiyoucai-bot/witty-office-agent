@@ -1,0 +1,212 @@
+# 九宫格记忆 + 内容分类。可用 WITTY_MEMORY_FILE 换文件。
+# 格子和分类都是配置，不要在代码里写「如果是某某行业就怎样」。
+
+[memory]
+auto_harvest = true
+# 不把 read/grep 等执行过程写进记忆。只收用户说的重要结论。
+harvest_process = false
+# 没对上格子的句子交给模型判断要不要记、记到哪一格。判不了就丢掉，不默认塞进领域要点
+judge_leftover = true
+working_set = 12
+archive_cap = 80
+retrieve_limit = 4
+inject_claim_cap = 3
+inject_char_cap = 1200
+topic_switch_overlap = 0.4
+focus_max_chars = 2200
+max_bullets = 40
+# 判官（judge_leftover）是收割路上唯一的网络调用，不在关键路径上跑：本轮结束就把句子
+# 交给后台，下一轮开头最多等这么久。超时不取消，让它继续跑，结果留给再下一轮。
+judge_settle_sec = 8
+
+[memory.gc]
+# 工作区记忆按 cwd 哈希建目录，每个新 cwd 都会留一个。一次性的 cwd（临时目录、
+# 测试工作区、跑完就删的检出）于是只增不减，全是空壳。
+# 只清**一条记忆都没写过**的目录，且原 cwd 已不在或超过 ttl 没动过。
+# 有内容的目录一律不动——哪怕它的工作区早就删了，那也是用户数据。
+enabled = true
+workspace_ttl_days = 30
+
+[memory.consolidate]
+# 巩固：把一格里越攒越碎的条目交给模型合并成更少更准的几条。
+# 收割只会 append + 按字面去重，同一件事换个说法就占两个槽（`点表在共享盘` /
+# `点表台账放 //nas/dispatch/points/`）。槽位是有限的（working_set），碎片多了就把
+# 真正有用的挤进归档。巩固是唯一能把「越用越糊」扳回来的一步。
+enabled = true
+# 整份记忆的总条数预算。超了就挑最满的格子巩固
+total_cap = 400
+# 单格攒到这么多条就该整理。working_set 是硬上限，这个是水位线
+cell_high_water = 10
+# 两次巩固至少隔这么多轮，别每轮都喊模型
+min_turns_between = 20
+# 一次最多整理几格
+max_cells_per_run = 2
+
+[memory.retrieve]
+min_score = 3
+# 归档升 Recalled 要比工作集更严；弱重叠只留浏览 hint
+archive_min_score = 5
+# dated bullets older than this many days lose decay_penalty per window; 0 = off
+decay_days = 14
+decay_penalty = 2
+# working set 没命中时，把重叠的归档条升成 Recalled
+archive = true
+# 「单个 2 字词不算命中」的唯一例外：这个词在整份记忆里独一份。中文实词多是两字
+# （老王、台账、检修），一律挡掉等于精确报专名也召不回；可 `回复`、`内容` 同样两字，
+# 放行就是假命中。分开两者靠 df，而 df 要有统计意义得先有语料——所以记忆攒到
+# rare_corpus_min 条以后才启用，且要求 df 占比不超过 rare_df_ratio。
+rare_corpus_min = 25
+rare_df_ratio = 0.05
+stopwords = [
+  "这次", "这个", "那个", "一个", "可以", "需要", "我们", "他们", "什么", "怎么",
+  "一下", "还是", "以及", "或者", "因为", "所以", "如果", "已经", "还要", "没有",
+  "不是", "就是", "然后", "但是", "还有", "进行", "相关", "内容", "问题", "一下",
+  "the", "and", "for", "with", "this", "that", "from",
+]
+
+[memory.aliases]
+# 纯字面召回跨不过说法差异：记忆里写「本月要把点表核对一遍」，问「这个月的目标是什么」
+# 一个词都不重叠，召回为空。这张表只做**加法**——问句原样不动，命中的同义词接在后面，
+# 让它们的 n-gram 也进候选。这不是语义检索，只把固定说法在配置里打通。
+# 左边是问句里可能出现的词，右边是记忆里可能写成的说法，双向各写一条。
+"本月" = ["这个月", "当月"]
+"这个月" = ["本月", "当月"]
+"当月" = ["本月", "这个月"]
+"本周" = ["这周", "这个星期"]
+"这周" = ["本周", "这个星期"]
+"目标" = ["要把", "计划", "打算"]
+"称呼" = ["叫我", "简称"]
+"叫我" = ["称呼"]
+"负责人" = ["负责", "专责", "联系人"]
+"联系人" = ["负责人", "联系方式"]
+"红线" = ["禁止", "不许", "必须先"]
+"偏好" = ["喜欢", "习惯", "默认用"]
+
+[[memory.cells]]
+id = "who"
+title = "身份与角色"
+description = "用户是谁、岗位、职责"
+
+[[memory.cells]]
+id = "goals"
+title = "当前目标"
+description = "正在推进的任务和成功标准"
+
+[[memory.cells]]
+id = "constraints"
+title = "红线与约束"
+description = "不能做、必须先问、合规限制"
+
+[[memory.cells]]
+id = "prefs"
+title = "个人偏好"
+description = "称呼、详略、工具习惯、交互偏好。必须记。"
+
+[[memory.cells]]
+id = "domain"
+title = "领域要点"
+description = "反复出现、下次还用得上的领域事实"
+
+[[memory.cells]]
+id = "assets"
+title = "项目与资产"
+description = "项目、系统、台账、资料包"
+
+[[memory.cells]]
+id = "people"
+title = "关系与组织"
+description = "协作对象、班组、科室"
+
+[[memory.cells]]
+id = "decisions"
+title = "已做决定"
+description = "已经拍板、下次不要再问的选择"
+
+[[memory.cells]]
+id = "followups"
+title = "待跟进"
+description = "用户交代下次要做的事"
+
+[[memory.taxonomy]]
+id = "engineering-project"
+title = "工程项目"
+keywords = ["工程项目", "工程施工", "施工图", "监理", "竣工", "隐蔽工程"]
+
+[[memory.taxonomy]]
+id = "marketing-project"
+title = "营销项目"
+keywords = ["营销项目", "业扩", "用电报装", "抄核收", "电费", "计量"]
+
+[[memory.taxonomy]]
+id = "major-infra"
+title = "大中型基建项目"
+keywords = ["大中型基建", "基建项目", "输变电", "变电站", "线路工程"]
+
+[[memory.taxonomy]]
+id = "rural-distribution"
+title = "农配网项目"
+keywords = ["农配网", "配农网", "农网改造", "配网工程", "台区"]
+
+[[memory.taxonomy]]
+id = "overhaul"
+title = "技改大修"
+keywords = ["技改", "大修", "检修计划", "反措"]
+
+[[memory.taxonomy]]
+id = "digital"
+title = "数字化信息化"
+keywords = ["信息化", "数字化", "系统上线", "中台", "数据治理"]
+
+[[memory.taxonomy]]
+id = "other-project"
+title = "其他项目"
+keywords = ["立项", "可研", "初设"]
+
+[memory.cues]
+# 线索支持两个算子（两侧都要有实字才算算子，所以 `sk-` 这类仍按字面匹配）：
+#   `核心+护词|护词`  同一分句里还有护词才算命中，长度按 核心+护词 一起算
+#   `核心-忌词|忌词`  同一分句里出现忌词就不算命中
+# 一句话里两格都命中时，**匹配到的字面更长**的那格赢（`下次不要` 比 `下次` 长，长的那条
+# 本来就是写给更窄的情形的）；平手则都进，因为这一带真有两件事同时说的句子。较量只在
+# 分句内进行，跨逗号不算——`以后都叫我老王，联系我走内网邮箱` 里的 `联系` 只是动词。
+# domain / assets 故意不给线索词：它俩没有词面标记，判不了就丢掉，不默认塞进领域要点
+#（判官跑不起来时由 `_structural_leftover` 按句子结构认）。
+prefs = ["我喜欢", "我爱", "爱吃", "我习惯", "以后都", "下次不要", "别再用", "请用", "偏好", "默认用", "叫我", "请简称", "不要每次"]
+# `我在` 得跟着岗位/部门词才算身份，否则 `我在等厂家回话` / `我在城东变现场` 都成了身份。
+who = ["我是", "我叫", "我负责", "我分管", "我在+做|负责|管|专责|岗位|科室|部门|中心|班组", "岗位是"]
+goals = ["目标是", "这次要", "需要完成", "请帮我做成"]
+# `不能` 后面跟因果解释时是在讲领域规律，不是红线：`五防校验不能通过是因为双位置不一致`。
+constraints = ["不能-是因为|一般是|原因是|通常是", "禁止", "必须先", "红线", "未经批准", "不要写入"]
+# `就用这个` 太窄，漏掉 `就用 104 规约` / `点表就用共享盘那份`；收成 `就用`。
+decisions = ["就按", "就用", "就这样定", "以后按这个", "就选"]
+followups = ["下次", "记得", "待会", "回头再", "跟进"]
+# `联系` 当动词时跟联系人无关（`这事要联系厂家确认`），只认名词形式。
+people = ["联系人", "联系方式", "联系电话", "班组", "科室", "处室", "项目经理"]
+
+[memory.assistant_cues]
+# 助手口吻只记决定/跟进，写进工作区，不进用户 prefs/who。
+decisions = ["已决定", "就这样定", "就按这个定", "拍板为", "以后按这个"]
+followups = ["下次跟进", "待跟进", "回头再做"]
+
+[memory.skip]
+# 命中则不写入记忆
+needles = ["password", "token", "api_key", "secret", "sk-", "口令", "密码", "密钥"]
+
+[memory.process]
+# 执行过程句不进九宫格/分类。偏好句里的「用 grep」仍走 prefs。
+needles = [
+  "我先看", "我先读", "我先查", "先跑一遍", "再跑一遍",
+  "已经改了", "已经读了", "刚改完", "刚看了", "刚才看",
+  "用 grep", "用 read", "用 find", "调用了", "工具结果",
+  "打开文件", "列出目录", "搜了一下",
+]
+
+[memory.pref_slots]
+taste = ["喜欢吃", "爱吃", "喜欢喝", "爱喝"]
+address = ["叫我", "请简称"]
+habit = ["我习惯", "以后都", "默认用", "请用"]
+avoid = ["下次不要", "别再用", "不要每次"]
+like = ["我喜欢", "我爱", "偏好"]
+
+[memory.pref_retract]
+cues = ["不吃", "不喝", "不喜欢", "不再", "别再", "不要再", "不爱", "改成"]

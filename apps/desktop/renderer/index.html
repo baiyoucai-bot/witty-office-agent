@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="glass">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; connect-src 'self' http://127.0.0.1:* http://localhost:*; img-src 'self' data: https: http:; style-src 'self' 'unsafe-inline'; script-src 'self'"
+    />
+    <title>人和</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app" data-view="chat">
+      <nav class="rail" aria-label="主导航">
+        <div class="brand">
+          <div class="brand-copy">
+            <span class="brand-mark" aria-hidden="true">人</span>
+            <strong>人和</strong>
+            <span class="muted" id="brand-version"></span>
+          </div>
+          <button id="rail-toggle" class="rail-btn rail-fold" type="button" title="收起左栏" aria-expanded="true" aria-label="收起左栏">
+            <span class="glyph" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none">
+                <path d="M7.2 4.6 3.8 10l3.4 5.4M12.8 4.6 16.2 10l-3.4 5.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="rail-label">收起</span>
+          </button>
+        </div>
+        <button id="new-session" class="new-session" type="button"><span class="new-plus" aria-hidden="true">＋</span><span class="rail-label">新建任务</span></button>
+        <div class="rail-nav">
+        <button class="rail-btn active" data-view="chat" type="button" title="对话" aria-label="对话">
+          <span class="glyph" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none">
+              <path d="M5 4.75h10A1.75 1.75 0 0 1 16.75 6.5v6A1.75 1.75 0 0 1 15 14.25H9.2L5.4 16.7a.6.6 0 0 1-.9-.52V14.25H5A1.75 1.75 0 0 1 3.25 12.5v-6A1.75 1.75 0 0 1 5 4.75Z" stroke="currentColor" stroke-width="1.4"/>
+            </svg>
+          </span>
+          <span class="rail-label">对话</span>
+        </button>
+        <button class="rail-btn" data-view="skills" type="button" title="技能" aria-label="技能">
+          <span class="glyph" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none">
+              <path d="M10 3.4 11.1 8.1 15.8 9.2 11.1 10.3 10 15 8.9 10.3 4.2 9.2 8.9 8.1Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="rail-label">能力中心</span>
+        </button>
+        </div>
+        <div class="rail-more">
+        <details class="rail-pack">
+          <summary>
+            <span class="glyph" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none">
+                <circle cx="5" cy="10" r="1.35" fill="currentColor"/>
+                <circle cx="10" cy="10" r="1.35" fill="currentColor"/>
+                <circle cx="15" cy="10" r="1.35" fill="currentColor"/>
+              </svg>
+            </span>
+            <span class="rail-label">更多</span>
+          </summary>
+          <button class="rail-btn" data-view="memory" type="button" title="九宫格记忆" aria-label="九宫格记忆">
+            <span class="glyph" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none">
+                <rect x="3.4" y="3.4" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.3"/>
+                <rect x="8" y="3.4" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.3"/>
+                <rect x="12.6" y="3.4" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.3"/>
+                <rect x="3.4" y="8" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.3"/>
+                <rect x="8" y="8" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.3"/>
+                <rect x="12.6" y="8" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.3"/>
+                <rect x="3.4" y="12.6" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.3"/>
+                <rect x="8" y="12.6" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.3"/>
+                <rect x="12.6" y="12.6" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.3"/>
+              </svg>
+            </span>
+            <span class="rail-label">九宫格</span>
+          </button>
+        <button class="rail-btn" data-view="links" type="button" title="链接库" aria-label="链接库">
+          <span class="glyph" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none">
+              <path d="M8.2 11.6 6.7 13.1a2.6 2.6 0 1 1-3.7-3.7l1.8-1.8a2.6 2.6 0 0 1 3.7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              <path d="M11.8 8.4 13.3 6.9a2.6 2.6 0 1 1 3.7 3.7l-1.8 1.8a2.6 2.6 0 0 1-3.7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              <path d="M8.1 11.9 11.9 8.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="rail-label">链接</span>
+        </button>
+        <button class="rail-btn" data-view="wiki" type="button" title="知识库 Wiki" aria-label="知识库 Wiki">
+          <span class="glyph" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none">
+              <path d="M5 4.2h8.4A1.6 1.6 0 0 1 15 5.8v9.4H6.6A1.6 1.6 0 0 1 5 13.6V4.2Z" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M5 13.6h8.4" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M7.4 7h5.2M7.4 9.6h3.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="rail-label">Wiki</span>
+        </button>
+        <button class="rail-btn" data-view="diary" type="button" title="每日日记" aria-label="每日日记">
+          <span class="glyph" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none">
+              <rect x="4" y="4.2" width="12" height="12.4" rx="1.6" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M7 3.2v2.4M13 3.2v2.4M4 8h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="rail-label">日记</span>
+        </button>
+        <button class="rail-btn" data-view="tools" type="button" title="工具" aria-label="工具">
+          <span class="glyph" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none">
+              <path d="M12.8 4.4a3 3 0 0 1 3 4.6L11.2 13.6a2 2 0 0 1-2.8 0l-1-1a2 2 0 0 1 0-2.8l4.6-4.6a3 3 0 0 1 1.8-.8Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+              <path d="M11.6 8.4 6 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="rail-label">工具</span>
+        </button>
+        </details>
+        <button class="rail-btn" data-view="settings" type="button" title="设置" aria-label="设置" id="open-settings">
+          <span class="glyph" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="2.15" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M10 3.4v1.5M10 15.1v1.5M3.4 10h1.5M15.1 10h1.5M5.4 5.4l1.1 1.1M13.5 13.5l1.1 1.1M14.6 5.4l-1.1 1.1M6.5 13.5 5.4 14.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="rail-label">设置</span>
+        </button>
+        </div>
+        <div class="nav-tasks">
+          <h2>任务<span id="session-count" class="task-count" hidden></span></h2>
+          <div class="side-search">
+            <input id="session-filter" type="search" placeholder="搜索任务" />
+          </div>
+          <div id="session-list" class="session-list" role="list"></div>
+        </div>
+        <footer class="rail-foot">
+          <label class="theme-rail" title="外观：浅色。点击切换">
+            <span class="glyph" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none">
+                <circle cx="10" cy="10" r="6.1" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M10 3.9v12.2A6.1 6.1 0 0 0 10 3.9Z" fill="currentColor"/>
+              </svg>
+            </span>
+            <span class="rail-label">琉璃</span>
+            <select id="theme-pick" aria-label="主题">
+              <option value="paper">浅色</option>
+              <option value="day">晴空</option>
+              <option value="glass">琉璃</option>
+              <option value="dusk">暮色</option>
+              <option value="pine">青松</option>
+              <option value="ink">墨夜</option>
+            </select>
+          </label>
+          <div id="status" class="status offline" title="未连接">未连接</div>
+        </footer>
+      </nav>
+
+      <aside class="sidebar" id="chat-sidebar" aria-label="本会话产物">
+        <section class="ctx-card art-panel" id="ctx-out">
+          <header class="ctx-head">
+            <h2>产物<span id="artifact-count" class="ctx-count" hidden></span></h2>
+            <div class="ctx-head-actions">
+              <button id="artifact-refresh" class="ctx-more" type="button">刷新</button>
+              <button type="button" id="side-close" class="ctx-more side-close" title="收起产物栏">收起</button>
+            </div>
+          </header>
+          <p class="ctx-hint muted">这一会话写出来的文件，不是工作区目录。</p>
+          <div id="artifact-list" class="ctx-list muted">当前会话还没有产物文件。</div>
+        </section>
+      </aside>
+
+      <main class="stage">
+        <section id="view-chat" class="view active" aria-label="对话">
+          <header class="chat-head">
+            <div class="chat-head-copy">
+              <h1 id="chat-title">新对话</h1>
+              <p id="chat-sub" class="muted">选择工作区后直接说事</p>
+            </div>
+            <div class="head-actions">
+              <button id="side-toggle" type="button" class="ghost quiet" title="打开或收起产物栏">产物栏</button>
+            </div>
+          </header>
+          <div class="transcript-scroll">
+            <div id="log" class="thread" aria-live="polite"></div>
+          </div>
+          <div class="chat-dock">
+            <div class="thread">
+              <div id="todo-dock" hidden></div>
+              <div id="plan-dock" class="plan-dock" hidden>
+                <strong>先规划，暂不改文件。</strong>
+                大改动会先让助手查清楚并写出方案。你点「批准」后它才动手。不想规划，发送 <code>/plan off</code>。
+              </div>
+              <div id="approval-dock"></div>
+              <form id="composer">
+                <div class="composer-card">
+                  <div id="queue-dock" hidden></div>
+                  <div id="slash-picker" class="picker" hidden role="listbox" aria-label="斜杠命令"></div>
+                  <div id="mention-picker" class="picker" hidden role="listbox" aria-label="工作区文件"></div>
+                  <div id="composer-clips" class="composer-clips" hidden></div>
+                  <textarea
+                    id="prompt"
+                    rows="2"
+                    placeholder="有什么好想法？"
+                  ></textarea>
+                  <div class="composer-bar">
+                    <div class="composer-tools">
+                      <button id="attach-files" class="icon-btn" type="button" title="插入文件或图片" aria-label="插入文件或图片">
+                        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                          <path d="M11.2 6.2 6.4 11a2.6 2.6 0 0 0 3.7 3.7l5.4-5.4a3.6 3.6 0 0 0-5.1-5.1L5 9.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                        </svg>
+                      </button>
+                      <input id="file-input" type="file" multiple accept="image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp" hidden />
+                    </div>
+                    <div class="composer-end">
+                      <label class="chip-select" title="当前模型">
+                        <select id="model-pick" aria-label="模型"></select>
+                      </label>
+                      <label class="chip-select" title="思考深度">
+                        <select id="think-level" aria-label="思考">
+                          <option value="off">关</option>
+                          <option value="short" selected>快速</option>
+                          <option value="long">深思</option>
+                        </select>
+                      </label>
+                      <button id="send" class="send-btn" type="submit" title="发送" aria-label="发送">
+                        <svg class="ico-send" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                          <path d="M10 15.2V5.4M6.4 8.6 10 5l3.6 3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <svg class="ico-stop" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                          <rect x="6.2" y="6.2" width="7.6" height="7.6" rx="1.4" fill="currentColor"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="composer-meta">
+                  <button id="workspace-pick" class="chip-btn" type="button" title="选择工作区">
+                    <span class="chip-ico" aria-hidden="true">⌘</span>
+                    <span id="workspace-label">选择工作区</span>
+                  </button>
+                  <label class="chip-select" title="危险工具怎么处理">
+                    <select id="approval-mode" aria-label="权限">
+                      <option value="always-ask">先问再做</option>
+                      <option value="allow-all">全部允许</option>
+                      <option value="deny-all">全部拒绝</option>
+                      <option value="read-only">只读</option>
+                    </select>
+                  </label>
+                  <span id="composer-hint" class="muted">危险工具会先问你</span>
+                </div>
+              </form>
+              <p class="ai-note">以上内容由 AI 生成，请注意甄别重要信息</p>
+              <section id="scene-dock" class="scene-dock">
+                <h3>场景示例</h3>
+                <div class="scene-row">
+                  <button type="button" data-scene="ppt">PPT</button>
+                  <button type="button" data-scene="data">数据处理</button>
+                  <button type="button" data-scene="doc">文件处理</button>
+                  <button type="button" data-scene="mail">邮件</button>
+                  <button type="button" data-scene="loop">定时任务</button>
+                  <button type="button" data-scene="skill">技能</button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-memory" class="view" hidden aria-label="九宫格记忆">
+          <div class="settings memory-page">
+            <header class="memory-head">
+              <div>
+                <h2>九宫格记忆</h2>
+                <p class="muted">3×3 长期记忆。点开格子可改正文或清空。对话里说「修正记忆 / 删掉这格」也会挂上写入工具。</p>
+              </div>
+              <label class="memory-search">
+                <span class="rail-label">检索本轮相关</span>
+                <input id="memory-query" type="search" placeholder="检索本轮相关，例如农配网台区" />
+              </label>
+            </header>
+            <section class="memory-panel" id="memory-recalled-card">
+              <h2>本轮相关</h2>
+              <div id="memory-recalled" class="memory-taxonomy muted">输入关键词后显示 Recalled</div>
+            </section>
+            <div id="memory-lattice" class="memory-lattice"></div>
+            <div class="memory-meta">
+              <section class="memory-panel">
+                <details id="memory-profile-fold" class="memory-profile-fold">
+                  <summary id="memory-profile-summary">用户画像 · 空</summary>
+                  <pre id="memory-profile" class="memory-profile">尚未形成画像</pre>
+                </details>
+              </section>
+              <section class="memory-panel">
+                <h2>时间线</h2>
+                <div id="memory-timeline" class="memory-taxonomy muted">还没有日期事件</div>
+              </section>
+              <section class="memory-panel">
+                <h2>关联</h2>
+                <div id="memory-links" class="memory-taxonomy muted">还没有连边</div>
+              </section>
+              <section class="memory-panel">
+                <h2>分类</h2>
+                <div id="memory-taxonomy" class="memory-taxonomy muted">还没有归过类</div>
+              </section>
+              <section class="memory-panel">
+                <h2>工作区</h2>
+                <div id="memory-workspace" class="memory-taxonomy muted">还没有本仓笔记</div>
+              </section>
+              <section class="memory-panel">
+                <h2>归档</h2>
+                <div id="memory-archive" class="memory-taxonomy muted">还没有归档</div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-mail" class="view" hidden aria-label="内网邮件">
+          <div class="settings memory-page habit-page">
+            <header class="memory-head">
+              <h2>内网邮件</h2>
+              <p class="muted">填内网 IMAP / SMTP。密码只进本机保险箱，不会出现在状态里。收发在对话里做，发送要你批准。</p>
+            </header>
+            <div class="habit-split mail-split">
+              <section class="habit-col">
+                <h2>通道</h2>
+                <p id="mail-form-status" class="muted"></p>
+                <form id="mail-form" class="habit-form">
+                  <label>IMAP 主机<input id="mail-imap-host" placeholder="mail.internal.example" autocomplete="off" /></label>
+                  <label>IMAP 端口<input id="mail-imap-port" type="number" min="1" step="1" value="993" /></label>
+                  <label>SMTP 主机<input id="mail-smtp-host" placeholder="mail.internal.example" autocomplete="off" /></label>
+                  <label>SMTP 端口<input id="mail-smtp-port" type="number" min="1" step="1" value="465" /></label>
+                  <label>账号<input id="mail-username" placeholder="zhangsan" autocomplete="off" /></label>
+                  <label>邮箱夹<input id="mail-mailbox" placeholder="INBOX" /></label>
+                  <label>IMAP 密码<input id="mail-imap-password" type="password" placeholder="未设" autocomplete="off" /></label>
+                  <label>SMTP 密码<input id="mail-smtp-password" type="password" placeholder="不填则沿用 IMAP 密码" autocomplete="off" /></label>
+                  <label class="habit-check"><input id="mail-imap-ssl" type="checkbox" checked /> IMAP SSL</label>
+                  <label class="habit-check"><input id="mail-smtp-ssl" type="checkbox" checked /> SMTP SSL</label>
+                  <label class="habit-check habit-wide"><input id="mail-smtp-starttls" type="checkbox" /> SMTP STARTTLS（常见 587 端口）</label>
+                  <div class="habit-actions habit-wide">
+                    <button type="submit" class="primary">保存通道</button>
+                    <button id="mail-open-chat" type="button" class="ghost quiet">去对话里处理邮件</button>
+                  </div>
+                </form>
+                <div id="mail-status" class="mail-status" hidden></div>
+              </section>
+              <section class="habit-col">
+                <h2>本地草稿</h2>
+                <div id="mail-drafts" class="memory-taxonomy muted">还没有草稿</div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-links" class="view" hidden aria-label="链接库">
+          <div class="settings memory-page habit-page">
+            <header class="memory-head">
+              <h2>链接库</h2>
+              <p class="muted">只读浏览 /v1/links。聊天和打开网页会自动收割；这里检索、点开详情，不在壳里另定协议。</p>
+              <label class="memory-search">
+                <span class="rail-label">检索</span>
+                <input id="link-query" type="search" placeholder="检索 OA、周报、主机或网址" />
+              </label>
+            </header>
+            <div class="habit-split">
+              <section class="habit-col">
+                <h2>常用系统</h2>
+                <pre id="link-habits" class="memory-profile muted">（按使用次数）</pre>
+                <div id="link-list" class="memory-taxonomy muted">还没有链接</div>
+              </section>
+              <section class="habit-col">
+                <h2>条目详情</h2>
+                <pre id="link-detail" class="memory-profile">点左边一条查看标题、别名和意图履历。</pre>
+                <h2>记一条</h2>
+                <form id="link-form" class="habit-form">
+                  <label>网址<input id="link-url" type="url" required placeholder="http://192.168.0.10/oa" /></label>
+                  <label>标题<input id="link-title" type="text" placeholder="OA 系统" /></label>
+                  <label>意图<input id="link-intent" type="text" placeholder="报周报" /></label>
+                  <label>别名<input id="link-alias" type="text" placeholder="OA" /></label>
+                  <button type="submit" class="ghost quiet">写入链接库</button>
+                </form>
+                <p id="link-status" class="muted"></p>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-wiki" class="view" hidden aria-label="知识库 Wiki">
+          <div class="settings memory-page habit-page">
+            <header class="memory-head">
+              <h2>知识库 Wiki</h2>
+              <p class="muted">转入的文档默认进本工作区 wiki：先落到 raw/，再在对话里用 llm-wiki 编译。不走向量检索。</p>
+            </header>
+            <div class="habit-split">
+              <section class="habit-col">
+                <h2>已转入原文</h2>
+                <div id="wiki-list" class="memory-taxonomy muted">还没有原文</div>
+              </section>
+              <section class="habit-col">
+                <h2>转入文档</h2>
+                <p class="muted">本地文件或公网网址，默认收入 raw/。</p>
+                <form id="wiki-form" class="habit-form">
+                  <label class="habit-wide">网址或路径<input id="wiki-source" type="text" required placeholder="https://… 或本机文件路径" /></label>
+                  <div class="habit-actions habit-wide">
+                    <button type="submit" class="primary">转入 wiki</button>
+                    <button id="wiki-pick" type="button" class="ghost quiet">选文件</button>
+                    <button id="wiki-compile" type="button" class="ghost quiet">去对话里编译</button>
+                  </div>
+                </form>
+                <pre id="wiki-detail" class="memory-profile muted">点左边一条看路径。</pre>
+                <p id="wiki-status" class="muted"></p>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-diary" class="view" hidden aria-label="每日日记">
+          <div class="settings memory-page habit-page">
+            <header class="memory-head">
+              <h2>每日日记</h2>
+              <p class="muted">只读浏览 /v1/diary。点日期看当天正文；聊天里说「今天做了」会自动回写时间线。</p>
+            </header>
+            <div class="habit-split">
+              <section class="habit-col">
+                <h2>有日记的日子</h2>
+                <div id="diary-days" class="memory-taxonomy muted">还没有日记</div>
+              </section>
+              <section class="habit-col">
+                <h2 id="diary-heading">当天</h2>
+                <pre id="diary-body" class="memory-profile">（这一天还没有日记）</pre>
+                <h2>写一行</h2>
+                <form id="diary-form" class="habit-form">
+                  <label>日期<input id="diary-day" type="date" /></label>
+                  <label class="habit-wide">今天做了什么<textarea id="diary-text" rows="3" required placeholder="今天下午开了验收会"></textarea></label>
+                  <button type="submit" class="ghost quiet">写入日记</button>
+                </form>
+                <p id="diary-status" class="muted"></p>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-skills" class="view" hidden aria-label="技能">
+          <div class="hub">
+            <header class="hub-head">
+              <div>
+                <h1>能力中心</h1>
+                <p class="muted">集中管理 Skill，组合本地 Agent 的可安装能力。内网 / 外网 / 通用表示运行环境。</p>
+                <p id="skill-install-status" class="muted" hidden></p>
+              </div>
+              <div class="hub-actions">
+                <button id="skill-add" class="primary" type="button">+ 添加技能</button>
+                <button id="skill-new" class="ghost quiet" type="button">+ 一句话生成技能</button>
+                <details class="hub-more">
+                  <summary title="更多技能维护动作" aria-label="更多">⋯</summary>
+                  <div class="hub-more-menu">
+                    <button id="skill-mount" type="button">挂载目录</button>
+                    <button id="skill-reload" type="button">重载技能</button>
+                  </div>
+                </details>
+              </div>
+            </header>
+            <div class="hub-tabs" id="skill-tabs">
+              <button type="button" class="hub-tab active" data-hub="all">Skill</button>
+              <button type="button" class="hub-tab" data-hub="system">系统</button>
+              <button type="button" class="hub-tab" data-hub="user">用户</button>
+            </div>
+            <div class="hub-filter">
+              <div class="hub-cats" id="skill-cats"></div>
+              <label class="memory-search">
+                <input id="skill-filter" type="search" placeholder="搜索技能名称或用途" />
+              </label>
+            </div>
+            <div id="skill-list" class="hub-grid"></div>
+          </div>
+          <dialog id="skill-modal" class="skill-modal" aria-label="技能详情">
+            <button id="skill-modal-close" class="skill-modal-close" type="button" aria-label="关闭详情">✕</button>
+            <!-- autofocus 落在正文上。不写的话 showModal 会把焦点丢给关闭按钮，一开窗右上角就顶个焦点框。 -->
+            <article id="skill-detail" class="catalog-detail skill-modal-body" tabindex="-1" autofocus></article>
+          </dialog>
+        </section>
+
+        <section id="view-tools" class="view" hidden aria-label="工具">
+          <div class="catalog">
+            <aside class="catalog-list">
+              <header>
+                <h2>工具</h2>
+                <input id="tool-filter" type="search" placeholder="筛选工具" />
+              </header>
+              <div id="tool-list"></div>
+            </aside>
+            <article id="tool-detail" class="catalog-detail"></article>
+          </div>
+        </section>
+
+        <section id="view-settings" class="view" hidden aria-label="设置">
+          <div class="settings-shell">
+            <aside class="settings-nav-col">
+              <header>
+                <h2>设置</h2>
+                <p class="muted">外观、模型、邮件、定时和工作区。提示词单独一页。</p>
+              </header>
+              <nav id="settings-nav"></nav>
+            </aside>
+            <div id="settings-detail" class="settings-main">
+              <section class="settings-card" data-panel="appearance">
+                <h2>外观</h2>
+                <p class="muted">默认浅色编辑气质。琉璃是毛玻璃质感，墨夜是原来的深色工作台。</p>
+                <div class="theme-grid" id="theme-grid">
+                  <button type="button" class="theme-swatch" data-theme="paper">
+                    <span class="chips" aria-hidden="true"></span>浅色
+                  </button>
+                  <button type="button" class="theme-swatch" data-theme="day">
+                    <span class="chips" aria-hidden="true"></span>晴空
+                  </button>
+                  <button type="button" class="theme-swatch" data-theme="glass">
+                    <span class="chips" aria-hidden="true"></span>琉璃
+                  </button>
+                  <button type="button" class="theme-swatch" data-theme="dusk">
+                    <span class="chips" aria-hidden="true"></span>暮色
+                  </button>
+                  <button type="button" class="theme-swatch" data-theme="pine">
+                    <span class="chips" aria-hidden="true"></span>青松
+                  </button>
+                  <button type="button" class="theme-swatch" data-theme="ink">
+                    <span class="chips" aria-hidden="true"></span>墨夜
+                  </button>
+                </div>
+              </section>
+              <section class="settings-card" data-panel="network" hidden>
+                <h2>网络</h2>
+                <p class="muted">默认外网。只有选内网时，抓取和助手才不去公网。模型接口地址是另一回事，不是唯一出口。</p>
+                <p id="web-status" class="muted">尚未读取当前配置</p>
+                <div class="theme-grid" id="net-grid">
+                  <button type="button" class="theme-swatch net-swatch" data-mode="public">
+                    <span class="chips" aria-hidden="true"></span>外网
+                  </button>
+                  <button type="button" class="theme-swatch net-swatch" data-mode="intranet">
+                    <span class="chips" aria-hidden="true"></span>内网
+                  </button>
+                </div>
+              </section>
+              <section class="settings-card" data-panel="model" hidden>
+                <h2>模型</h2>
+                <p class="muted">可以配多套。首页右上角切换当前模型。钥匙只进本机 vault。</p>
+                <p id="model-status" class="muted">尚未读取当前配置</p>
+                <div id="model-list" class="model-list"></div>
+                <h3 id="model-form-title">新增模型</h3>
+                <div class="settings-form">
+                  <label>目录名 <input id="model-name" placeholder="例如 deepseek-flash" /></label>
+                  <label>显示名 <input id="model-display" placeholder="给自己看的名字" /></label>
+                  <label class="span-2">模型 ID <input id="model-id" placeholder="例如 deepseek-chat" /></label>
+                  <label class="span-2">接口地址 <input id="model-base" placeholder="例如 http://127.0.0.1:8000/v1" /></label>
+                  <label class="span-2">API Key <input id="model-key" type="password" placeholder="留空表示不改已保存的钥匙" autocomplete="off" /></label>
+                  <label>最大输出 token <input id="model-max-tokens" type="number" min="1" step="1" /></label>
+                  <label>超时秒数 <input id="model-timeout" type="number" min="1" step="1" /></label>
+                </div>
+                <div class="toolbar">
+                  <button id="save-model" class="primary" type="button">保存</button>
+                  <button id="new-model" class="ghost" type="button">新增一套</button>
+                  <button id="delete-model" class="deny" type="button">删除这套</button>
+                </div>
+              </section>
+              <section class="settings-card" data-panel="email" hidden>
+                <h2>邮件</h2>
+                <p class="muted">内网 IMAP/SMTP。密码只保存在本机保险箱，不会写进配置文件，也不会出现在状态里。</p>
+                <p id="email-form-status" class="muted"></p>
+                <div class="settings-form" id="email-form">
+                  <label>IMAP 主机 <input id="email-imap-host" placeholder="mail.internal.example" autocomplete="off" /></label>
+                  <label>IMAP 端口 <input id="email-imap-port" type="number" min="1" step="1" value="993" /></label>
+                  <label>SMTP 主机 <input id="email-smtp-host" placeholder="mail.internal.example" autocomplete="off" /></label>
+                  <label>SMTP 端口 <input id="email-smtp-port" type="number" min="1" step="1" value="465" /></label>
+                  <label>账号 <input id="email-username" placeholder="zhangsan" autocomplete="off" /></label>
+                  <label>邮箱夹 <input id="email-mailbox" placeholder="INBOX" /></label>
+                  <label>IMAP 密码 <input id="email-imap-password" type="password" placeholder="已设则留空不改" autocomplete="off" /></label>
+                  <label>SMTP 密码 <input id="email-smtp-password" type="password" placeholder="不填则沿用 IMAP 密码" autocomplete="off" /></label>
+                  <label class="span-2"><input id="email-imap-ssl" type="checkbox" checked /> IMAP SSL</label>
+                  <label class="span-2"><input id="email-smtp-ssl" type="checkbox" checked /> SMTP SSL</label>
+                  <label class="span-2"><input id="email-smtp-starttls" type="checkbox" /> SMTP STARTTLS（常见 587 端口）</label>
+                </div>
+                <div class="toolbar">
+                  <button id="save-email" class="primary" type="button">保存通道</button>
+                  <button id="open-mail-desk" class="ghost" type="button" data-view="mail">打开收件工作台</button>
+                </div>
+              </section>
+              <section class="settings-card" data-panel="schedule" hidden>
+                <h2>定时任务</h2>
+                <p class="muted">产品内循环：对话里 <code>/loop 5m</code> 或本页创建。间隔 + 提示 + 结束时间。到期停、<code>/loop off</code> 停、暂停停、删除停。serve 进程会自动扫；「扫一次」只是立刻补一枪，不另起守护进程。</p>
+                <div class="settings-form" id="schedule-form">
+                  <label>短名 <input id="schedule-name" placeholder="morning-standup" autocomplete="off" /></label>
+                  <label>间隔
+                    <select id="schedule-period">
+                      <option value="">一次</option>
+                      <option value="5m">每 5 分钟</option>
+                      <option value="15m">每 15 分钟</option>
+                      <option value="30m" selected>每 30 分钟</option>
+                      <option value="1h">每小时</option>
+                      <option value="12h">每 12 小时</option>
+                      <option value="1d">每天</option>
+                    </select>
+                  </label>
+                  <label>开始 <input id="schedule-start" type="datetime-local" /></label>
+                  <label>结束 <input id="schedule-end" type="datetime-local" /></label>
+                  <label class="span-2">提示 / 命令 <textarea id="schedule-prompt" rows="3" placeholder="到点发给 Agent 的正文，例如：汇总今日待办"></textarea></label>
+                  <label class="span-2"><input id="schedule-enabled" type="checkbox" checked /> 保存后启用</label>
+                </div>
+                <div class="toolbar">
+                  <button id="schedule-save" class="primary" type="button">创建任务</button>
+                  <button id="schedule-refresh" class="ghost quiet" type="button">刷新</button>
+                  <button id="schedule-tick" class="ghost quiet" type="button">扫一次</button>
+                </div>
+                <div id="schedule-list" class="ctx-list muted">还没有定时任务</div>
+                <p id="schedule-status" class="muted"></p>
+              </section>
+              <section class="settings-card" data-panel="workspace" hidden>
+                <h2>工作区</h2>
+                <p id="api-base" class="muted"></p>
+                <div class="settings-form">
+                  <label>项目 <input id="project-id" value="default_project" /></label>
+                  <label>Agent <input id="agent-id" value="default_agent" /></label>
+                  <label class="span-2">工作区 <input id="workspace" placeholder="默认：API 进程 cwd" /></label>
+                </div>
+              </section>
+              <section class="prompt-split" data-panel="prompt" hidden>
+                <aside class="prompt-list">
+                  <header>
+                    <h2>提示词 <span id="prompt-count" class="muted"></span></h2>
+                    <input id="prompt-filter" type="search" placeholder="筛选 key 或摘要" />
+                  </header>
+                  <div id="prompt-nav"></div>
+                </aside>
+                <div class="prompt-editor">
+                  <header class="prompt-head">
+                    <div>
+                      <h2 id="prompt-title">选择一条提示词</h2>
+                      <p id="prompt-meta" class="muted">发给模型的配置。改完保存即生效，不必发版。</p>
+                    </div>
+                    <div class="toolbar">
+                      <button id="save-prompt" class="primary" type="button">保存</button>
+                      <button id="revert-prompt" class="ghost" type="button">还原</button>
+                    </div>
+                  </header>
+                  <p id="prompt-status" class="muted"></p>
+                  <textarea id="prompt-body" rows="18" spellcheck="false" placeholder="从中间栏点一条提示词"></textarea>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div id="side-open-handle" class="split-handle split-handle-reopen" title="拖出产物栏" role="separator" aria-orientation="vertical"></div>
+    <script src="markdown.js"></script>
+    <script src="tool_fold.js"></script>
+    <script src="recall.js"></script>
+    <script src="cite.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

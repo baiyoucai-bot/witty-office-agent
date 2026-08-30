@@ -1,0 +1,104 @@
+{
+  "title": "通用智能体底座",
+  "footer": "内部汇报",
+  "theme": {
+    "font": "Microsoft YaHei",
+    "bg": "#F6F1E8",
+    "ink": "#1A2428",
+    "muted": "#5C6B70",
+    "accent": "#C45C26",
+    "accent2": "#163A3A",
+    "cover_bg": "#163A3A",
+    "cover_ink": "#F6F1E8",
+    "card": "#FFFbf4",
+    "line": "#E2D9CC"
+  },
+  "slides": [
+    {
+      "bg": "#163A3A",
+      "boxes": [
+        {"kind": "rect", "x": 0, "y": 0, "w": 5.35, "h": 7.5, "fill": "#102828", "shadow": false},
+        {"kind": "rect", "x": 5.35, "y": 0, "w": 7.983, "h": 7.5, "fill": "#F6F1E8", "shadow": false},
+        {"kind": "rect", "x": 0.72, "y": 2.05, "w": 0.48, "h": 0.48, "fill": "#C45C26", "shadow": false},
+        {"kind": "text", "x": 0.72, "y": 2.72, "w": 4.2, "h": 1.7, "text": "通用智能体底座", "size": 34, "color": "#F6F1E8", "bold": true, "name": "witty-title"},
+        {"kind": "rect", "x": 0.72, "y": 4.55, "w": 1.4, "h": 0.045, "fill": "#C45C26", "shadow": false},
+        {"kind": "text", "x": 0.72, "y": 4.75, "w": 4.2, "h": 0.7, "text": "可编辑 PPT  ·  现场排版", "size": 14, "color": "#E8A078", "bold": true, "name": "witty-kicker"},
+        {"kind": "text", "x": 6.05, "y": 2.55, "w": 6.4, "h": 2.6, "text": "不是套模板。按这一次的场合、听众和风格发明配色和版式，写出 WPS / Office 能改的稿。", "size": 18, "color": "#1A2428", "name": "witty-body"}
+      ]
+    },
+    {
+      "bg": "#F6F1E8",
+      "boxes": [
+        {"kind": "rect", "x": 0, "y": 0, "w": 13.333, "h": 0.1, "fill": "#163A3A", "shadow": false},
+        {"kind": "text", "x": 0.7, "y": 0.38, "w": 12, "h": 0.32, "text": "原则", "size": 12, "color": "#C45C26", "bold": true, "name": "witty-kicker"},
+        {"kind": "text", "x": 0.7, "y": 0.72, "w": 12, "h": 0.62, "text": "这一次怎么说，就怎么排", "size": 30, "color": "#1A2428", "bold": true, "name": "witty-title"},
+        {"kind": "round", "x": 0.7, "y": 1.62, "w": 3.85, "h": 4.55, "fill": "#FFFbf4"},
+        {"kind": "rect", "x": 0.7, "y": 1.62, "w": 0.09, "h": 4.55, "fill": "#C45C26", "shadow": false},
+        {"kind": "text", "x": 1.05, "y": 1.9, "w": 3.2, "h": 0.42, "text": "配色", "size": 16, "color": "#C45C26", "bold": true},
+        {"kind": "text", "x": 1.05, "y": 2.45, "w": 3.2, "h": 3.3, "text": "底、字、强调色按口述现场定。改口就改 token，不用换一套内置主题。", "size": 15, "color": "#1A2428"},
+        {"kind": "round", "x": 4.75, "y": 1.62, "w": 3.85, "h": 4.55, "fill": "#FFFbf4"},
+        {"kind": "rect", "x": 4.75, "y": 1.62, "w": 0.09, "h": 4.55, "fill": "#C45C26", "shadow": false},
+        {"kind": "text", "x": 5.1, "y": 1.9, "w": 3.2, "h": 0.42, "text": "版式", "size": 16, "color": "#C45C26", "bold": true},
+        {"kind": "text", "x": 5.1, "y": 2.45, "w": 3.2, "h": 3.3, "text": "每页用盒子自由摆：色条、标题、三栏、表、图。坐标英寸，16:9 画布。", "size": 15, "color": "#1A2428"},
+        {"kind": "round", "x": 8.8, "y": 1.62, "w": 3.85, "h": 4.55, "fill": "#FFFbf4"},
+        {"kind": "rect", "x": 8.8, "y": 1.62, "w": 0.09, "h": 4.55, "fill": "#C45C26", "shadow": false},
+        {"kind": "text", "x": 9.15, "y": 1.9, "w": 3.2, "h": 0.42, "text": "成品", "size": 16, "color": "#C45C26", "bold": true},
+        {"kind": "text", "x": 9.15, "y": 2.45, "w": 3.2, "h": 3.3, "text": "原生文本、表格和图表。WPS / Office 里能改字、改表、改图数据。", "size": 15, "color": "#1A2428"}
+      ]
+    },
+    {
+      "bg": "#F6F1E8",
+      "boxes": [
+        {"kind": "rect", "x": 0, "y": 0, "w": 13.333, "h": 0.1, "fill": "#163A3A", "shadow": false},
+        {"kind": "text", "x": 0.7, "y": 0.38, "w": 12, "h": 0.32, "text": "交付", "size": 12, "color": "#C45C26", "bold": true, "name": "witty-kicker"},
+        {"kind": "text", "x": 0.7, "y": 0.72, "w": 12, "h": 0.62, "text": "一次写出两种文件", "size": 30, "color": "#1A2428", "bold": true, "name": "witty-title"},
+        {"kind": "round", "x": 0.7, "y": 1.62, "w": 5.85, "h": 4.55, "fill": "#163A3A"},
+        {"kind": "text", "x": 1.05, "y": 2.05, "w": 5.15, "h": 0.5, "text": ".pptx", "size": 22, "color": "#E8A078", "bold": true},
+        {"kind": "bullets", "x": 1.05, "y": 2.75, "w": 5.15, "h": 2.9, "items": ["给同事继续改", "原生形状和表格", "不走公网美化"], "size": 16, "color": "#F6F1E8", "name": "witty-body"},
+        {"kind": "round", "x": 6.8, "y": 1.62, "w": 5.85, "h": 4.55, "fill": "#FFFbf4"},
+        {"kind": "text", "x": 7.15, "y": 2.05, "w": 5.15, "h": 0.5, "text": ".html", "size": 22, "color": "#C45C26", "bold": true},
+        {"kind": "bullets", "x": 7.15, "y": 2.75, "w": 5.15, "h": 2.9, "items": ["浏览器里预览", "同稿盒子树", "改完可转回 pptx"], "size": 16, "color": "#1A2428"}
+      ]
+    },
+    {
+      "bg": "#F6F1E8",
+      "boxes": [
+        {"kind": "rect", "x": 0, "y": 0, "w": 13.333, "h": 0.1, "fill": "#163A3A", "shadow": false},
+        {"kind": "text", "x": 0.7, "y": 0.38, "w": 12, "h": 0.32, "text": "怎么改", "size": 12, "color": "#C45C26", "bold": true, "name": "witty-kicker"},
+        {"kind": "text", "x": 0.7, "y": 0.72, "w": 12, "h": 0.62, "text": "一块、一页，都能改", "size": 30, "color": "#1A2428", "bold": true, "name": "witty-title"},
+        {"kind": "table", "x": 0.7, "y": 1.62, "w": 11.95, "h": 4.55, "headers": ["你说", "用什么"], "rows": [["这块标题改一下", "pptx_edit_box"], ["这一页重排", "pptx_replace_slide"], ["再加一页", "pptx_add_page"], ["整份风格换掉", "改 theme 再 pptx_render"]]}
+      ]
+    },
+    {
+      "bg": "#F6F1E8",
+      "boxes": [
+        {"kind": "rect", "x": 0, "y": 0, "w": 13.333, "h": 0.1, "fill": "#163A3A", "shadow": false},
+        {"kind": "text", "x": 0.7, "y": 0.38, "w": 12, "h": 0.32, "text": "图表", "size": 12, "color": "#C45C26", "bold": true, "name": "witty-kicker"},
+        {"kind": "text", "x": 0.7, "y": 0.72, "w": 12, "h": 0.62, "text": "原生图表，Office 里能改数据", "size": 30, "color": "#1A2428", "bold": true, "name": "witty-title"},
+        {
+          "kind": "chart",
+          "chart": "column",
+          "x": 0.7,
+          "y": 1.55,
+          "w": 11.95,
+          "h": 4.65,
+          "text": "演示数据：季度完成率",
+          "categories": ["一季度", "二季度", "三季度", "四季度"],
+          "series": [{"name": "完成率", "values": [72, 81, 86, 91]}],
+          "colors": ["#C45C26", "#163A3A"],
+          "name": "witty-chart"
+        }
+      ]
+    },
+    {
+      "bg": "#163A3A",
+      "boxes": [
+        {"kind": "rect", "x": 0, "y": 0, "w": 0.14, "h": 7.5, "fill": "#C45C26", "shadow": false},
+        {"kind": "text", "x": 0.75, "y": 2.35, "w": 11.8, "h": 0.36, "text": "下一步", "size": 13, "color": "#E8A078", "bold": true, "name": "witty-kicker"},
+        {"kind": "text", "x": 0.75, "y": 2.8, "w": 11.8, "h": 1.25, "text": "把场合、页数、风格发过来", "size": 34, "color": "#F6F1E8", "bold": true, "name": "witty-title"},
+        {"kind": "rect", "x": 0.75, "y": 4.2, "w": 1.5, "h": 0.045, "fill": "#C45C26", "shadow": false},
+        {"kind": "text", "x": 0.75, "y": 4.45, "w": 11.8, "h": 0.9, "text": "按这一次的要求出可编辑稿，不再从目录里挑模板。", "size": 17, "color": "#F6F1E8"}
+      ]
+    }
+  ]
+}

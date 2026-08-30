@@ -1,0 +1,22 @@
+{
+  "name": "witty-agent-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Electron shell for the witty-agent Python HTTP API",
+  "author": "baiyoucai-bot <58627702+baiyoucai-bot@users.noreply.github.com>",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "postinstall": "node scripts/ensure-electron.js",
+    "ensure-electron": "node scripts/ensure-electron.js",
+    "verify": "node scripts/verify-chat.js",
+    "launch-check": "electron . --launch-check",
+    "window-chat-check": "node scripts/window-chat-check.js",
+    "window-approval-check": "node scripts/window-approval-check.js",
+    "window-ui-check": "node scripts/window-ui-check.js",
+    "ui-shot": "node scripts/ui-shot.js"
+  },
+  "devDependencies": {
+    "electron": "43.2.0"
+  }
+}

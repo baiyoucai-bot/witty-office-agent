@@ -100,7 +100,15 @@ npm start
 ```
 
 没有 Electron 时，先 `serve`，再用浏览器打开 `apps/desktop/renderer/index.html`。
-Windows 一键安装器（自带 Python 与依赖）用 `uv run python scripts/build_windows_installer.py` 构建。
+
+一键安装器（自带 Python 与全部依赖，用户免装环境）：
+
+```bash
+uv run python scripts/build_windows_installer.py   # Windows NSIS exe（macOS 上交叉构建）
+uv run python scripts/build_macos_installer.py     # macOS dmg（Apple Silicon；Intel 用 WITTY_MAC_ARCH=x86_64）
+```
+
+安装包未签名/未公证：Windows SmartScreen 与 macOS Gatekeeper 首次运行会提示，右键「打开」或选择「仍要运行」即可。
 
 ## 当作 Python 库
 
@@ -196,4 +204,4 @@ docs/                指南与维护记录
 
 ## License
 
-Apache-2.0，见 [LICENSE](LICENSE)。
+MIT，见 [LICENSE](LICENSE)。

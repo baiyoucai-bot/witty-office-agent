@@ -53,8 +53,9 @@ node_modules/
 apps/desktop/dist/
 apps/desktop/.electron-cache/
 
-# Windows 安装器构建（scripts/build_windows_installer.py）
+# 桌面安装器构建暂存（scripts/build_windows_installer.py / build_macos_installer.py）
 apps/desktop/build-win/
+apps/desktop/build-mac/
 apps/desktop/release/
 apps/desktop/.build-cache/
 apps/desktop/buildtools/package-lock.json

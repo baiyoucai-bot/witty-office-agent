@@ -77,8 +77,9 @@ def main() -> None:
     base.resize((256, 256), Image.LANCZOS).save(
         OUT, format="ICO", sizes=[(s, s) for s in SIZES]
     )
+    # mac 打包（electron-builder 转 icns）要求 ≥512px，直接存底图
     png = OUT.with_suffix(".png")
-    base.resize((256, 256), Image.LANCZOS).save(png, format="PNG")
+    base.save(png, format="PNG")
     sys.stdout.write(f"icon -> {OUT}\n")
 
 

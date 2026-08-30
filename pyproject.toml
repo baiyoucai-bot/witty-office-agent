@@ -3,7 +3,7 @@ name = "witty-office-agent"
 version = "0.1.0"
 description = "面向办公场景的通用智能体底座：技能、工具、审批、记忆、沙箱与自进化"
 readme = "README.md"
-license = "Apache-2.0"
+license = "MIT"
 license-files = ["LICENSE"]
 authors = [
     { name = "baiyoucai-bot", email = "58627702+baiyoucai-bot@users.noreply.github.com" }

@@ -1,5 +1,5 @@
-# Windows 安装器打包配置。由 scripts/build_windows_installer.py 驱动：
-# 它先把 CPython + witty_agent + uv/busybox 备到 build-win/，再跑 electron-builder。
+# 桌面安装器打包配置。分别由 scripts/build_windows_installer.py / build_macos_installer.py 驱动：
+# 它们先把 CPython + witty_agent + uv 备到 build-win/ 或 build-mac/，再跑 electron-builder。
 # 单独跑 electron-builder 而不先 staging，产出的安装器没有后端，装上就是空壳。
 appId: org.wittyagent.desktop
 productName: 人和
@@ -14,11 +14,6 @@ files:
   - preload.js
   - renderer/**
 asar: true
-extraResources:
-  - from: build-win/python
-    to: python
-  - from: build-win/bin
-    to: bin
 electronDownload:
   mirror: https://cdn.npmmirror.com/binaries/electron/
 win:
@@ -26,6 +21,24 @@ win:
   target:
     - target: nsis
       arch: [x64]
+  extraResources:
+    - from: build-win/python
+      to: python
+    - from: build-win/bin
+      to: bin
+mac:
+  icon: build/icon.png
+  category: public.app-category.productivity
+  target:
+    - target: dmg
+      arch: [arm64]
+  extraResources:
+    - from: build-mac/python
+      to: python
+    - from: build-mac/bin
+      to: bin
+dmg:
+  artifactName: WittyAgent-${version}-arm64.dmg
 nsis:
   oneClick: false
   perMachine: false

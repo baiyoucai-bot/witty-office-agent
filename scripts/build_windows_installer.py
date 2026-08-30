@@ -144,7 +144,7 @@ def stage_python() -> Path:
 def build_wheel() -> Path:
     run(["uv", "run", "python", "scripts/sync_package_data.py"], cwd=ROOT)
     run(["uv", "build", "--wheel"], cwd=ROOT)
-    wheels = sorted((ROOT / "dist").glob("witty_agent-*-py3-none-any.whl"), key=lambda p: p.stat().st_mtime)
+    wheels = sorted((ROOT / "dist").glob("witty_office_agent-*-py3-none-any.whl"), key=lambda p: p.stat().st_mtime)
     if not wheels:
         raise SystemExit("uv build 没产出 wheel")
     return wheels[-1]
@@ -171,7 +171,7 @@ def install_payload(python_root: Path, wheel: Path) -> None:
             "copy",
             "--compile-bytecode",
             "--reinstall",
-            f"witty-agent[classify] @ {wheel.resolve().as_uri()}",
+            f"witty-office-agent[classify] @ {wheel.resolve().as_uri()}",
         ],
         cwd=ROOT,
     )

@@ -171,6 +171,13 @@ uv lock
 4. 只读排查、搜索、没落盘的试验可以不记；试验影响了最终方案的，在 CHANGELOG 的 Rationale 里写一句。
 5. 以后某个专题有自己的 CHANGELOG / PROGRESS / UNRESOLVED 时，专题账本和全局索引都要更新。全局日志是索引，不是替代。
 
+提交与推送纪律（用户要求提交时）：
+
+1. 固定三步：`git add -A` → `git status --short` 复核暂存清单 → `git commit` + `git push`（upstream 已绑定，不带 `-u`）。
+2. 排除靠 `.gitignore` 兜底：私有账本（`docs/change_maintenance/`）、构建暂存（`build-win/`、`build-mac/`）、`release/` 安装器、`.env`、截图夹具都已在名单里。复核时看到大目录/二进制/密钥就先停下补 `.gitignore`——推上公开仓的历史抠不掉。
+3. 新增会产生本地产物的脚本时，`.gitignore` 在同一笔提交里配套补上（build-mac 漏配过一次，差点把 117 万行 CPython 暂存推上公开仓）。
+4. 发版本：`git tag v0.x.y && git push origin v0.x.y`，安装器走 Release 附件不进 git。
+
 CHANGELOG 条目格式：
 
 ```markdown

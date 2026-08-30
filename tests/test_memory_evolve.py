@@ -316,19 +316,19 @@ class MemoryEvolveTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn("prefs", liked["cells"])
             report = harvest_user_text(
                 memory.user_dir,
-                "我喜欢简短回复。这次农配网台区改造要先看施工图，下次记得跟进竣工资料。",
+                "我喜欢简短回复。这次课件改版要先看教学计划，下次记得跟进定稿资料。",
             )
             self.assertGreaterEqual(int(report["added"]), 1)
             self.assertIn("prefs", report["cells"])
-            self.assertIn("rural-distribution", report["taxonomy"])
+            self.assertIn("teaching", report["taxonomy"])
             snapshot = public_memory(memory.user_dir)
             self.assertEqual(len(snapshot["cells"]), 9)
             prefs = next(item for item in snapshot["cells"] if item["id"] == "prefs")
             self.assertIn("简短", prefs["body"])
-            self.assertTrue(any(item["id"] == "rural-distribution" for item in snapshot["taxonomy"]))
+            self.assertTrue(any(item["id"] == "teaching" for item in snapshot["taxonomy"]))
             self.assertIn("对话轮次", snapshot["profile"])
             domain_before = next(item for item in snapshot["cells"] if item["id"] == "domain")
-            self.assertNotIn("农配网", domain_before["body"])
+            self.assertNotIn("课件", domain_before["body"])
             leftover = harvest_user_text(
                 memory.user_dir,
                 "这个工程资料明天要交甲方，里面有隐蔽验收记录。",
@@ -339,9 +339,9 @@ class MemoryEvolveTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn("工程资料", domain["body"])
             snapshot = public_memory(memory.user_dir)
             self.assertTrue(snapshot["links"])
-            recalled = attach_retrieval(memory, "农配网台区").retrieved
+            recalled = attach_retrieval(memory, "课件教学计划").retrieved
             self.assertTrue(recalled)
-            self.assertIn("农配网", recalled)
+            self.assertIn("课件", recalled)
 
     def test_retrieve_matching_bullets_not_neighbor_dump(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -752,7 +752,7 @@ class MemoryEvolveTests(unittest.IsolatedAsyncioTestCase):
 
             report = harvest_user_text(
                 memory.user_dir,
-                "你现在能做ppt吗？电压等级是 10kV。农配网项目是什么？",
+                "你现在能做ppt吗？电压等级是 10kV。课程设计是什么？",
                 judge_fn=keep_all,
             )
             self.assertIn("domain", report.get("cells") or [])
@@ -760,7 +760,7 @@ class MemoryEvolveTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn("10kV", body)
             self.assertNotIn("ppt", body)
             self.assertNotIn("是什么", body)
-            self.assertNotIn("农配网项目是什么", topic_body(memory.user_dir, "rural-distribution"))
+            self.assertNotIn("课程设计是什么", topic_body(memory.user_dir, "teaching"))
 
     def test_leftover_without_judge_does_not_dump_domain(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -1249,23 +1249,23 @@ class MemoryEvolveTests(unittest.IsolatedAsyncioTestCase):
                 workspace=workspace,
                 root=root,
             )
-            harvest_user_text(memory.user_dir, "这次农配网台区改造要先看施工图。")
+            harvest_user_text(memory.user_dir, "这次课件改版要先看教学计划。")
             status, body = await handle_request(
                 "GET",
-                "/v1/memory?project_id=grid-base&agent_id=coder&scope=user&q=农配网台区施工图&workspace_dir="
+                "/v1/memory?project_id=grid-base&agent_id=coder&scope=user&q=课件教学计划&workspace_dir="
                 + str(workspace),
             )
             self.assertEqual(status, 200)
             self.assertTrue(body.get("retrieved"), body)
-            self.assertIn("农配网", body["retrieved"])
+            self.assertIn("课件", body["retrieved"])
             hits = body.get("hits") or []
             self.assertTrue(hits, body)
-            self.assertTrue(any(item.get("slug") == "rural-distribution" or "农配网" in str(item.get("text") or "") for item in hits))
-            ranked = retrieve_hits(memory.user_dir, "农配网台区施工图")
+            self.assertTrue(any(item.get("slug") == "teaching" or "课件" in str(item.get("text") or "") for item in hits))
+            ranked = retrieve_hits(memory.user_dir, "课件教学计划")
             self.assertTrue(ranked)
             self.assertTrue(all("slug" in item and "text" in item for item in ranked))
-            rural = next(item for item in body["taxonomy"] if item["id"] == "rural-distribution")
-            self.assertGreaterEqual(int(rural["count"]), 1)
+            teaching = next(item for item in body["taxonomy"] if item["id"] == "teaching")
+            self.assertGreaterEqual(int(teaching["count"]), 1)
 
     async def test_memory_http_workspace_query_fills_hits(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

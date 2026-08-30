@@ -488,7 +488,7 @@ class TaxonomyPathBlocksQuestionsTest(unittest.TestCase):
         self.settings = load_memory_settings()
         keywords = {word for item in self.settings.taxonomy for word in item.keywords}
         # 下面的句子都拿这几个词做锚。真配置里没有了就该改测试，不是让它悄悄空跑。
-        for word in ("数字化", "农配网", "业扩", "检修计划", "施工图"):
+        for word in ("数字化", "课件", "获客", "合同审查", "施工图"):
             self.assertIn(word, keywords, f"真配置里没有关键词 {word}，这条测试会空跑")
 
     def _cells_after(self, sentence: str) -> dict[str, list[str]]:
@@ -514,11 +514,11 @@ class TaxonomyPathBlocksQuestionsTest(unittest.TestCase):
     def test_head_questions_with_taxonomy_keywords_do_not_land(self) -> None:
         for sentence in (
             "什么是数字化审计",
-            "哪些台区要做农配网改造",
-            "怎么申请业扩报装",
-            "如何编制检修计划",
+            "哪些班级要换新课件",
+            "怎么提升获客转化",
+            "如何准备合同审查",
             "谁负责施工图会签",
-            "怎样编制检修计划",
+            "怎样准备合同审查",
         ):
             with self.subTest(sentence=sentence):
                 self.assertEqual(self._cells_after(sentence), {}, sentence)
@@ -530,8 +530,8 @@ class TaxonomyPathBlocksQuestionsTest(unittest.TestCase):
         """
         for sentence, cell in (
             ("数字化审计的责任部门是信息通信公司", "digital"),
-            ("农配网改造的验收标准按导则走", "rural-distribution"),
-            ("业扩报装的资料包放在共享盘", "marketing-project"),
+            ("课件改版的验收标准按教研组要求走", "teaching"),
+            ("获客活动的资料包放在运营共享目录", "marketing-project"),
             ("施工图会签由基建部统一收口", "engineering-project"),
         ):
             with self.subTest(sentence=sentence):

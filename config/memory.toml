@@ -135,22 +135,22 @@ keywords = ["工程项目", "工程施工", "施工图", "监理", "竣工", "�
 [[memory.taxonomy]]
 id = "marketing-project"
 title = "营销项目"
-keywords = ["营销项目", "业扩", "用电报装", "抄核收", "电费", "计量"]
+keywords = ["营销项目", "市场推广", "投放", "获客", "转化率", "品牌活动"]
 
 [[memory.taxonomy]]
-id = "major-infra"
-title = "大中型基建项目"
-keywords = ["大中型基建", "基建项目", "输变电", "变电站", "线路工程"]
+id = "product-project"
+title = "产品与需求"
+keywords = ["产品需求", "需求评审", "PRD", "原型设计", "竞品分析", "版本迭代"]
 
 [[memory.taxonomy]]
-id = "rural-distribution"
-title = "农配网项目"
-keywords = ["农配网", "配农网", "农网改造", "配网工程", "台区"]
+id = "teaching"
+title = "教学与课程"
+keywords = ["课程设计", "课件", "教案", "备课", "教学计划", "考试命题"]
 
 [[memory.taxonomy]]
-id = "overhaul"
-title = "技改大修"
-keywords = ["技改", "大修", "检修计划", "反措"]
+id = "legal"
+title = "法务与合同"
+keywords = ["合同审查", "法律意见", "案卷", "尽职调查", "诉讼", "合规审查"]
 
 [[memory.taxonomy]]
 id = "digital"

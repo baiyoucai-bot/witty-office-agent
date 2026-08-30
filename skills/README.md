@@ -61,3 +61,10 @@ allowed-tools: read grep bash
 ## 本地扩展
 
 不改仓库也能加技能：`WITTY_SKILLS_PATH=/path/a:/path/b` 指向额外目录，或在桌面「能力中心」安装本地 SKILL.md。
+
+## 生态技能（按需安装，不默认内置）
+
+[skills.sh](https://skills.sh) 生态里与办公场景对口、但带外部依赖的技能，用内置的 `find-skills` 按需拉，不进默认包：
+
+- **飞书全家桶**（`larksuite/cli` 官方出品：lark-doc 文档、会议纪要、审批、考勤、OKR 等 20+ 个）——需要飞书账号和 `lark-cli`，飞书用户装了即是完整的协同办公通道：`npx skills add https://github.com/larksuite/cli --skill lark-doc -g`，装完 `export WITTY_SKILLS_PATH=~/.agents/skills`。
+- 收录原则同上文纪律：与内核既有能力重叠的不装（如 brainstorming 类计划方法论——内核已有计划模式）、与自研技能重复的不装（如通用 docx/pptx/xlsx 技能）。

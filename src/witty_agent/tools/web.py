@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import codecs
 import json
 import os
+import re
+from html.parser import HTMLParser
 from urllib.error import URLError
 from urllib.parse import quote, urlparse
 from urllib.request import Request, urlopen
@@ -15,9 +18,118 @@ from witty_agent.tools.registry import ToolSpec, register_tool
 
 _TAVILY_ENDPOINT = "https://api.tavily.com/search"
 
+_CHARSET_HEADER_RE = re.compile(r"""charset\s*=\s*["']?\s*([A-Za-z0-9._-]+)""", re.IGNORECASE)
+# 同时覆盖 <meta charset="..."> 和 <meta http-equiv="Content-Type" content="...; charset=...">
+_CHARSET_META_RE = re.compile(rb"""<meta[^>]+charset\s*=\s*["']?\s*([A-Za-z0-9._-]+)""", re.IGNORECASE)
+# 页面常声明 gb2312/gbk 却混用超集字符，统一按 gb18030 解，无损兼容
+_CHARSET_ALIASES = {"gb2312", "gbk", "gb-2312", "csgb2312", "gb_2312-80"}
 
-def web_fetch(url: str) -> str:
-    """抓取一个 http/https URL 的文本正文。"""
+_HTML_SKIP_TAGS = {"script", "style", "noscript", "template"}
+_HTML_BLOCK_TAGS = {
+    "address", "article", "aside", "blockquote", "br", "caption", "dd", "div", "dl", "dt",
+    "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6",
+    "header", "hr", "li", "main", "nav", "ol", "option", "p", "pre", "section", "select",
+    "table", "tbody", "td", "tfoot", "th", "thead", "tr", "ul",
+}
+
+
+def _declared_charset(content_type: str, body: bytes) -> str:
+    match = _CHARSET_HEADER_RE.search(content_type or "")
+    if not match:
+        match = _CHARSET_META_RE.search(body[:4096])
+    if not match:
+        return ""
+    charset = match.group(1)
+    charset = charset.decode("ascii", errors="replace") if isinstance(charset, bytes) else charset
+    charset = charset.strip().lower()
+    if charset in _CHARSET_ALIASES:
+        return "gb18030"
+    try:
+        codecs.lookup(charset)
+    except LookupError:
+        return ""
+    return charset
+
+
+def _try_decode(body: bytes, encoding: str) -> str | None:
+    """严格解码；仅当错误出现在末尾 4 字节内（按字节截断切在多字节字符中间）时截尾重试。"""
+    try:
+        return body.decode(encoding)
+    except UnicodeDecodeError as exc:
+        if exc.start >= len(body) - 4:
+            try:
+                return body[: exc.start].decode(encoding)
+            except UnicodeDecodeError:
+                return None
+        return None
+
+
+def _decode_body(body: bytes, content_type: str) -> str:
+    charset = _declared_charset(content_type, body)
+    if charset:
+        return body.decode(charset, errors="replace")
+    for encoding in ("utf-8", "gb18030"):
+        text = _try_decode(body, encoding)
+        if text is not None:
+            return text
+    return body.decode("utf-8", errors="replace")
+
+
+def _looks_like_html(content_type: str, body: bytes) -> bool:
+    if "text/html" in (content_type or "").lower():
+        return True
+    head = body[:256].lstrip().lower()
+    return head.startswith(b"<!doctype html") or head.startswith(b"<html")
+
+
+class _TextExtractor(HTMLParser):
+    """丢 script/style/noscript/template 内容，块级标签转换行；charref 由解析器直接还原。"""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self._chunks: list[str] = []
+        self._skip_depth = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in _HTML_SKIP_TAGS:
+            self._skip_depth += 1
+        elif tag in _HTML_BLOCK_TAGS:
+            self._chunks.append("\n")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in _HTML_SKIP_TAGS:
+            self._skip_depth = max(0, self._skip_depth - 1)
+        elif tag in _HTML_BLOCK_TAGS:
+            self._chunks.append("\n")
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in _HTML_BLOCK_TAGS:
+            self._chunks.append("\n")
+
+    def handle_data(self, data: str) -> None:
+        if not self._skip_depth:
+            self._chunks.append(data)
+
+    def text(self) -> str:
+        lines = [re.sub(r"[ \t\r\f\v\xa0]+", " ", line).strip() for line in "".join(self._chunks).splitlines()]
+        merged: list[str] = []
+        for line in lines:
+            if line:
+                merged.append(line)
+            elif merged and merged[-1]:
+                merged.append("")
+        return "\n".join(merged).strip()
+
+
+def _html_to_text(markup: str) -> str:
+    extractor = _TextExtractor()
+    extractor.feed(markup)
+    extractor.close()
+    return extractor.text()
+
+
+def web_fetch(url: str, raw: bool = False) -> str:
+    """抓取一个 http/https URL 的文本正文；HTML 默认抽正文，raw=True 返回原文。"""
     parsed = urlparse(url)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
         raise ValueError(get_prompt("web_fetch_bad_url"))
@@ -27,11 +139,15 @@ def web_fetch(url: str) -> str:
     request = Request(url, headers={"User-Agent": "witty-agent/web_fetch"})
     try:
         with urlopen(request, timeout=timeout) as response:  # noqa: S310 - scheme already checked
-            raw = response.read(limit + 1)
+            payload = response.read(limit + 1)
+            content_type = str(response.headers.get("Content-Type") or "")
     except (URLError, TimeoutError, OSError) as exc:
         raise RuntimeError(get_prompt("web_fetch_failed", reason=str(exc))) from exc
-    text = raw[:limit].decode("utf-8", errors="replace")
-    if len(raw) > limit:
+    body = payload[:limit]
+    text = _decode_body(body, content_type)
+    if not raw and _looks_like_html(content_type, body):
+        text = _html_to_text(text)
+    if len(payload) > limit:
         text += "\n" + get_prompt("web_fetch_truncated", limit=str(limit))
     from witty_agent.links import record_opened_url
 
@@ -137,7 +253,10 @@ register_tool(
         description=get_prompt("tool_desc_web_fetch"),
         parameters={
             "type": "object",
-            "properties": {"url": {"type": "string", "description": get_prompt("web_param_url")}},
+            "properties": {
+                "url": {"type": "string", "description": get_prompt("web_param_url")},
+                "raw": {"type": "boolean", "description": get_prompt("web_param_raw")},
+            },
             "required": ["url"],
         },
         func=web_fetch,

@@ -88,6 +88,7 @@ export WITTY_BASE_URL="https://api.example.com/v1"
 export WITTY_MODEL_ID="your-model-id"
 
 uv run witty-agent          # 冒烟：加载提示词/技能/工具
+uv run witty-agent doctor   # 环境自检：模型 key/连通、提示词完整性、沙箱、搜索配置
 uv run witty-agent serve    # HTTP API，默认 127.0.0.1:8765
 ```
 
@@ -184,7 +185,7 @@ uv run ruff check                                # lint
 ## 边界（诚实说明）
 
 - 沙箱是「独立工作区 + 独立解释器 + 路径 jail」，**不是** OS 级进程隔离（Seatbelt/Landlock），挡不住蓄意逃逸。
-- HTTP 服务默认只绑 `127.0.0.1`，没有对外鉴权网关，不要直接暴露公网。
+- HTTP 服务默认只绑 `127.0.0.1` 无鉴权；要暴露给别的机器时设 `WITTY_API_TOKEN`（请求带 `Authorization: Bearer <token>`），但仍不建议直接暴露公网。
 - MCP 只有 stdio 传输；resources / prompts 原语未接。
 - 公网抓取 `web_fetch` 默认按配置策略放行/拒绝，内网部署可锁公网。
 - 邮件需自行配置 IMAP/SMTP 主机。

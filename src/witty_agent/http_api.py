@@ -48,7 +48,6 @@ from witty_agent.todo import current_todos
 from witty_agent.skills import (
     install_user_skill,
     list_skill_groups,
-    list_skills,
     load_skill,
     network_label,
     uninstall_user_skill,
@@ -1718,6 +1717,25 @@ async def handle_request(method: str, path: str, body: dict[str, Any] | None = N
     return 404, {"error": f"unknown route {method} {route}"}
 
 
+def request_authorized(headers: Any) -> bool:
+    """可选 API 令牌：WITTY_API_TOKEN 未设 = 本机模式，全放行；设了则必须带 Bearer 头。
+
+    默认只绑 127.0.0.1，token 是给「要把端口暴露给别的机器」的部署用的最低门槛，
+    不设就完全不改变本机行为。比较走 compare_digest，防时序侧信道。
+    """
+    import hmac
+
+    token = (os.environ.get("WITTY_API_TOKEN") or "").strip()
+    if not token:
+        return True
+    supplied = str(headers.get("Authorization") or "")
+    if supplied.startswith("Bearer "):
+        supplied = supplied[len("Bearer ") :]
+    else:
+        supplied = str(headers.get("X-API-Token") or "")
+    return bool(supplied) and hmac.compare_digest(supplied.strip(), token)
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, format: str, *args: object) -> None:
         logger.info(format, *args)
@@ -1725,7 +1743,15 @@ class Handler(BaseHTTPRequestHandler):
     def _cors(self) -> None:
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Token")
+
+    def _reject_unauthorized(self) -> bool:
+        from witty_agent.prompts import get_prompt
+
+        if request_authorized(self.headers):
+            return False
+        self._send(401, {"error": get_prompt("http_unauthorized")})
+        return True
 
     def _send(self, status: int, payload: dict[str, Any]) -> None:
         raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
@@ -1751,6 +1777,8 @@ class Handler(BaseHTTPRequestHandler):
         return data if isinstance(data, dict) else {}
 
     def do_GET(self) -> None:
+        if self._reject_unauthorized():
+            return
         parsed = urlparse(self.path)
         route = parsed.path.rstrip("/") or "/"
         if route.startswith("/v1/sessions/") and route.endswith("/stream"):
@@ -1791,6 +1819,8 @@ class Handler(BaseHTTPRequestHandler):
     def _dispatch(self, method: str) -> None:
         import asyncio
 
+        if self._reject_unauthorized():
+            return
         try:
             status, payload = asyncio.run(handle_request(method, self.path, self._body()))
         except Exception as exc:

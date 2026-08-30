@@ -40,6 +40,7 @@ __all__ = [
     "OpenAICompatLLM",
     "Orchestrator",
     "PlanModeController",
+    "Scheduler",
     "ScriptedLLM",
     "SessionLog",
     "Witty",
@@ -66,6 +67,7 @@ __all__ = [
     "load_mcp_tools",
     "load_prompts",
     "load_skill",
+    "parse_schedule_file",
     "restore_snapshot",
     "result_text",
     "run_goal_loop",
@@ -92,6 +94,10 @@ def main() -> None:
         from witty_agent.plugins.mail import probe_live
 
         raise SystemExit(probe_live())
+    if len(sys.argv) > 1 and sys.argv[1] == "doctor":
+        from witty_agent.doctor import run_doctor
+
+        raise SystemExit(run_doctor())
     logger = get_logger("cli")
     prompt = get_prompt("harness_system")
     skills = list_skills()

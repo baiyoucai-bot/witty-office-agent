@@ -65,7 +65,7 @@
 | 信息流 | `mail-desk`（IMAP/SMTP 邮件）、`agenda-digest`（日程摘要）、`week-digest`（周报）、`daily-diary`（行为日记）、`link-box`（链接库）、`llm-wiki`（工作区知识库） |
 | 归档 | `file-classify`（目录资料分类） |
 | 创作 | `novel-to-video`（小说转分镜文案） |
-| 元能力 | `agent-creation` / `agent-evaluation` / `agent-optimization` / `benchmark-design`（造 agent、评 agent、优化 agent）、`find-skills`（从 [skills.sh](https://skills.sh) 生态搜索并安装社区技能）、`skill-porting`、`session-health`、`generation-ui`、`software-engineering` |
+| 元能力 | `agent-creation` / `agent-evaluation` / `agent-optimization` / `benchmark-design`（造 agent、评 agent、优化 agent）、`skill-optimization`（审计与优化技能本身）、`find-skills`（从 [skills.sh](https://skills.sh) 生态搜索并安装社区技能）、`skill-porting`、`session-health`、`generation-ui`、`software-engineering` |
 
 **场景举例**：产品经理用 `long-document` 写需求文档、`slides` 出评审材料、`nl2sql` 直接对埋点库问数，九宫格替他记住每次评审拍板的结论；教师用 `witty-ppt-skills` + `long-document` 出课件和讲义，用 `data-analysis` 批改成绩分布；律师用 `doc-qa` 问案卷、`file-classify` 归档卷宗、`word-docx` 出规范文书；行政用 `office-document` + `mail-desk` + `week-digest` 处理纪要邮件周报。
 

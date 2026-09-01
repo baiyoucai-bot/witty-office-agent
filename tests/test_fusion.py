@@ -8,7 +8,7 @@ from pathlib import Path
 from witty_agent.evolution import append_score, ensure_benchmark, restore_snapshot, save_snapshot
 from witty_agent.llm import ScriptedLLM, text_reply, tool_reply
 from witty_agent.session import create_agent, create_session, list_project_agents
-from witty_agent.skills import list_skills
+from witty_agent.skills import list_skills, load_skill, match_relevant_skills
 from witty_agent.state.agent_state import load_agent_state
 
 
@@ -71,7 +71,7 @@ class FusionTests(unittest.IsolatedAsyncioTestCase):
     def test_snapshot_and_scoreboard(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            agent = create_agent("grid-base", "evolving", root=root)
+            create_agent("grid-base", "evolving", root=root)
             record = load_agent_state("grid-base", "evolving", root=root)
             snap = save_snapshot(record, root=root)
             self.assertTrue(snap.is_file())
@@ -86,6 +86,7 @@ class FusionTests(unittest.IsolatedAsyncioTestCase):
     def test_optimization_skill_is_loadable(self) -> None:
         names = {item.name for item in list_skills()}
         self.assertIn("agent-optimization", names)
+        self.assertIn("skill-optimization", names)
         self.assertIn("agent-evaluation", names)
         self.assertIn("agent-creation", names)
         self.assertIn("benchmark-design", names)
@@ -94,6 +95,17 @@ class FusionTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("slides", names)
         self.assertIn("software-engineering", names)
         self.assertIn("skill-porting", names)
+        skill = next(item for item in list_skills() if item.name == "skill-optimization")
+        self.assertIn("冻结 Benchmark", skill.description)
+        self.assertIn("严格决策", load_skill("skill-optimization").body)
+        self.assertEqual(
+            [item.name for item in match_relevant_skills("优化一个 skill 的路由和正文")],
+            ["skill-optimization"],
+        )
+        self.assertEqual(
+            [item.name for item in match_relevant_skills("优化智能体的 AGENTS.md")],
+            ["agent-optimization"],
+        )
 
 
 if __name__ == "__main__":

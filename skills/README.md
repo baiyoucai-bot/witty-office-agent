@@ -56,6 +56,7 @@ allowed-tools: read grep bash
 - **正文里引用的路径必须存在。** `scripts/x.py`、`references/y.md` 写了就得有，校验脚本查死链。
 - **技能名不得占用内核工具/命令名**（`witty_agent.kernel_surface`），注册时会被拒绝。
 - **改了技能要跑路由回归**：`uv run python -m unittest tests.test_skills_tools`。改 description 最容易把别的技能的触发词抢走，历史上出过这种回归。
+- **优化现有技能用 `skill-optimization`**：先建立结构、路由正负例和行为基线，再做单变量改动；只有硬门全绿且指标严格变好才接受。
 - 发 wheel 前跑 `uv run python scripts/sync_package_data.py`，把 `skills/` 同步进包数据。
 
 ## 本地扩展

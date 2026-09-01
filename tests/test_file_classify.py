@@ -887,6 +887,22 @@ class JsonFallbackTests(unittest.TestCase):
         self.assertEqual(mode, "salvaged")
         self.assertEqual([r["unit_id"] for r in payload["results"]], ["u_1", "u_2"])
 
+    def test_close_truncated_json_after_complete_records(self) -> None:
+        raw = (
+            '{"results": [{"unit_id": "u_1", "category_id": "C01"}, '
+            '{"unit_id": "u_2", "category_id": "C02"}'
+        )
+        payload, mode = fc._parse_lenient(raw)
+        self.assertEqual(mode, "closed")
+        self.assertEqual([r["unit_id"] for r in payload["results"]], ["u_1", "u_2"])
+
+    def test_close_truncated_json_mid_string(self) -> None:
+        raw = '{"results": [{"unit_id": "u_1", "reasoning": "根据路径判断'
+        payload, mode = fc._parse_lenient(raw)
+        self.assertEqual(mode, "closed")
+        self.assertEqual(payload["results"][0]["unit_id"], "u_1")
+        self.assertEqual(payload["results"][0]["reasoning"], "根据路径判断")
+
     def test_unsalvageable_still_raises(self) -> None:
         with self.assertRaises(ValueError):
             fc._parse_lenient("抱歉，我只会写散文")

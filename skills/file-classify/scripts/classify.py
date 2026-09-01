@@ -21,7 +21,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out", default="", help="结果目录，默认写到 WITTY_HOME/file_classify/<目录名>")
     parser.add_argument("--limit", type=int, default=0, help="最多处理多少个单元，先小批试跑用")
     parser.add_argument("--concurrency", type=int, default=4, help="同时在飞的模型调用数，网关吃不住就调小")
-    parser.add_argument("--batch", type=int, default=15, help="第一轮每批单元数")
+    parser.add_argument("--batch", type=int, default=8, help="第一轮每批单元数")
     parser.add_argument("--pass2-batch", type=int, default=6, help="第二轮每批单元数，带正文所以更小")
     parser.add_argument("--group-batch", type=int, default=5, help="拆分件确认每批组数")
     parser.add_argument("--excerpt-chars", type=int, default=1200, help="每个文件的正文摘录上限")

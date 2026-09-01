@@ -9,6 +9,7 @@ import re
 import urllib.error
 import urllib.request
 from collections.abc import Iterable
+from urllib.parse import urlparse
 
 from witty_agent.logging import get_logger, redact
 from witty_agent.retry import RetryableLLMError, retry_call
@@ -19,6 +20,21 @@ _RETRYABLE_STATUS = {408, 409, 429, 500, 502, 503, 504, 524}
 THINK_LEVELS = frozenset({"off", "short", "long"})
 _THINK_TAG = re.compile(r"<think>(.*?)</think>", re.IGNORECASE | re.DOTALL)
 _REASONING_KEYS = ("reasoning_content", "reasoning", "thinking")
+
+
+def chat_completions_url(base_url: str) -> str:
+    """拼 chat 调用地址：配置里已经带 /chat/completions 的不再追加。
+
+    有人填 `http://host/v1`，有人填完整 `.../v1/chat/completions`，
+    还有网关是 `.../chat/completions/V2`。无条件再拼一段会 404。
+    """
+    base = (base_url or "").strip().rstrip("/")
+    if not base:
+        return ""
+    path = urlparse(base).path.rstrip("/").lower()
+    if "/chat/completions" in path:
+        return base
+    return f"{base}/chat/completions"
 
 
 class ScriptedLLM:
@@ -92,7 +108,7 @@ class OpenAICompatLLM:
             return AgentMessage(role="assistant", content=str(exc), stop_reason="error")
 
     def _request(self, context: AgentContext) -> AgentMessage:
-        url = f"{self.base_url}/chat/completions"
+        url = chat_completions_url(self.base_url)
         body = _openai_chat_body(
             context,
             model_id=self.model_id,

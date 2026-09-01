@@ -547,7 +547,14 @@ async def _ask(system: str, user: str, *, max_tokens: int, timeout: int, think: 
     message = await llm(context)
     if message.stop_reason == "error":
         raise RuntimeError(message.text() or "file_classify llm error")
-    return message.text()
+    text = (message.text() or "").strip()
+    if text:
+        return text
+    reasoning = (message.reasoning or "").strip()
+    if reasoning:
+        logger.warning("模型 content 为空，改从 reasoning 取回复 chars=%s", len(reasoning))
+        return reasoning
+    return ""
 
 
 # 模型返回非法 JSON 时整批重试的次数；HTTP 层的可重试状态码在 llm.py 里另算
@@ -602,6 +609,45 @@ def _repair_json_text(text: str) -> str:
             continue
         out.append(ch)
     return "".join(out)
+
+
+def _close_truncated_json(text: str) -> str:
+    """补全因 max_tokens 截断而缺的引号和括号。字符串未闭合时先补 `"`，再按栈补 `]`/`}`。"""
+    s = (text or "").rstrip()
+    if not s:
+        return s
+    in_str = False
+    escaped = False
+    stack: list[str] = []
+    for ch in s:
+        if not in_str:
+            if ch == '"':
+                in_str = True
+            elif ch == "{":
+                stack.append("}")
+            elif ch == "[":
+                stack.append("]")
+            elif stack and ch == stack[-1]:
+                stack.pop()
+            continue
+        if escaped:
+            escaped = False
+            continue
+        if ch == "\\":
+            escaped = True
+            continue
+        if ch == '"':
+            in_str = False
+    extra: list[str] = []
+    if in_str:
+        extra.append('"')
+    extra.extend(reversed(stack))
+    if not extra:
+        return s
+    closed = s.rstrip()
+    if closed.endswith(","):
+        closed = closed[:-1].rstrip()
+    return closed + "".join(extra)
 
 
 def _salvage_records(text: str) -> list[dict]:
@@ -728,7 +774,10 @@ async def _ask_json(
         if parse_mode != "ok":
             entry["parse"] = parse_mode
             logger.warning(
-                "模型 JSON 非法但已%s继续", "修复" if parse_mode == "repaired" else "抢救部分记录"
+                "模型 JSON 非法但已%s继续",
+                {"repaired": "修复", "closed": "补全截断括号", "salvaged": "抢救部分记录"}.get(
+                    parse_mode, parse_mode
+                ),
             )
         _record_call(record, entry)
         if breaker is not None:
@@ -795,20 +844,26 @@ def _parse_json(raw: str) -> dict:
 
 
 def _parse_lenient(raw: str) -> tuple[dict, str]:
-    """严格解析失败就先修笔误再抢救记录。返回 (payload, 解析方式 ok/repaired/salvaged)。"""
+    """严格解析失败就先修笔误、再补截断括号，最后抢救记录。返回 (payload, 解析方式)。"""
     try:
         return _parse_json(raw), "ok"
     except ValueError as strict_err:
         text = _strip_fences(raw)
         repaired = _repair_json_text(text)
-        if repaired != text:
+        closed = _close_truncated_json(repaired)
+        for candidate, mode in (
+            (repaired, "repaired"),
+            (closed, "closed"),
+        ):
+            if candidate == text:
+                continue
             try:
-                parsed = json.loads(repaired)
-                if isinstance(parsed, dict):
-                    return parsed, "repaired"
+                parsed = json.loads(candidate)
             except json.JSONDecodeError:
-                pass
-        records = _salvage_records(repaired)
+                continue
+            if isinstance(parsed, dict):
+                return parsed, mode
+        records = _salvage_records(closed)
         if records:
             payload = {
                 "results": [item for item in records if "unit_id" in item],
@@ -1177,9 +1232,9 @@ async def aclassify_directory(
     out_dir: str | Path | None = None,
     limit: int = 0,
     concurrency: int = 4,
-    pass1_batch: int = 15,
-    pass2_batch: int = 6,
-    group_batch: int = 5,
+    pass1_batch: int = 8,
+    pass2_batch: int = 4,
+    group_batch: int = 3,
     excerpt_chars: int = 1200,
     title_chars: int = 160,
     max_tokens: int = 6000,

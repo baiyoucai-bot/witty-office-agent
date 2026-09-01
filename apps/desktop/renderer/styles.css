@@ -5055,3 +5055,351 @@ label.grow {
   max-width: 0 !important;
   height: 0 !important;
 }
+
+/* 2026-09 工作台视觉整理：默认浅色主题改为中性底色 + 单一蓝色强调。
+   原来的琉璃渐变在大窗口里会放大空白和浮层感，这里保留主题入口但让信息层级靠
+   明度、边界和间距表达，减少装饰对长对话与设置编辑的干扰。 */
+:root {
+  --col: min(1040px, calc(100% - 56px));
+}
+
+html[data-theme="paper"],
+html[data-theme="glass"] {
+  color-scheme: light;
+  --bg: #f5f7f9;
+  --bg-rail: #e9eef2;
+  --bg-side: #eef2f5;
+  --panel: #ffffff;
+  --panel-2: #f3f6f8;
+  --ink: #17202a;
+  --fg: #17202a;
+  --muted: #667480;
+  --line: #d8e1e7;
+  --accent: #2f6fed;
+  --accent-dim: #e8f0ff;
+  --user: #e8f0fb;
+  --user-line: #d4e3f8;
+  --send: #2f6fed;
+  --send-ink: #ffffff;
+  --send-hover: #1f56c6;
+  --focus: #2f6fed;
+  --code: #f0f3f5;
+  --quote: #2f6fed;
+  --grid: transparent;
+  --shadow: 0 12px 30px rgba(23, 32, 42, 0.08);
+}
+
+html[data-theme="paper"] body,
+html[data-theme="glass"] body {
+  background: var(--bg);
+}
+
+html[data-theme="glass"] .rail,
+html[data-theme="glass"] .sidebar,
+html[data-theme="glass"] .catalog-list,
+html[data-theme="glass"] .prompt-list,
+html[data-theme="glass"] .settings-nav-col,
+html[data-theme="paper"] .rail,
+html[data-theme="paper"] .sidebar,
+html[data-theme="paper"] .catalog-list,
+html[data-theme="paper"] .prompt-list,
+html[data-theme="paper"] .settings-nav-col {
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+  backdrop-filter: blur(18px) saturate(1.08);
+}
+
+html[data-theme="glass"] .rail,
+html[data-theme="paper"] .rail {
+  background: var(--bg-rail);
+  border-right-color: var(--line);
+  box-shadow: inset -1px 0 rgba(255, 255, 255, 0.55);
+}
+
+html[data-theme="glass"] .sidebar,
+html[data-theme="paper"] .sidebar {
+  background: var(--bg-side);
+  border-left-color: var(--line);
+}
+
+html[data-theme="glass"] .stage,
+html[data-theme="paper"] .stage {
+  background: var(--bg);
+}
+
+html[data-theme="glass"] .composer-card,
+html[data-theme="paper"] .composer-card,
+html[data-theme="glass"] .picker,
+html[data-theme="paper"] .picker,
+html[data-theme="glass"] .ctx-card,
+html[data-theme="paper"] .ctx-card,
+html[data-theme="glass"] #view-settings .settings-card,
+html[data-theme="paper"] #view-settings .settings-card {
+  border-color: var(--line);
+  box-shadow: var(--shadow);
+  -webkit-backdrop-filter: blur(14px) saturate(1.04);
+  backdrop-filter: blur(14px) saturate(1.04);
+}
+
+html[data-theme="glass"] .rail-btn,
+html[data-theme="paper"] .rail-btn {
+  border-radius: 8px;
+  color: #596875;
+}
+
+html[data-theme="glass"] .rail-btn:hover,
+html[data-theme="paper"] .rail-btn:hover,
+html[data-theme="glass"] .theme-rail:hover,
+html[data-theme="paper"] .theme-rail:hover,
+html[data-theme="glass"] .rail-pack > summary:hover,
+html[data-theme="paper"] .rail-pack > summary:hover {
+  background: #f8fafb;
+  color: var(--ink);
+}
+
+html[data-theme="glass"] .rail-btn.active,
+html[data-theme="paper"] .rail-btn.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+html[data-theme="glass"] .new-session,
+html[data-theme="paper"] .new-session {
+  border-radius: 8px;
+  background: #1f2933;
+  color: #ffffff;
+  box-shadow: 0 5px 12px rgba(23, 32, 42, 0.16);
+}
+
+html[data-theme="glass"] .new-session .new-plus,
+html[data-theme="paper"] .new-session .new-plus {
+  color: #ffffff;
+}
+
+html[data-theme="glass"] .new-session:hover,
+html[data-theme="paper"] .new-session:hover {
+  background: #111a23;
+  color: #ffffff;
+}
+
+html[data-theme="glass"] .nav-tasks,
+html[data-theme="paper"] .nav-tasks {
+  border-top-color: var(--line);
+}
+
+html[data-theme="glass"] .task-search-toggle,
+html[data-theme="paper"] .task-search-toggle {
+  background: transparent;
+  border-color: #c9d4dc;
+}
+
+html[data-theme="glass"] .task-search-toggle:hover,
+html[data-theme="glass"] .task-search-toggle[aria-expanded="true"],
+html[data-theme="paper"] .task-search-toggle:hover,
+html[data-theme="paper"] .task-search-toggle[aria-expanded="true"] {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+html[data-theme="glass"] .session-item,
+html[data-theme="paper"] .session-item {
+  border-radius: 8px;
+  color: #4d5b67;
+}
+
+html[data-theme="glass"] .session-item:hover,
+html[data-theme="paper"] .session-item:hover {
+  background: #f8fafb;
+  color: var(--ink);
+}
+
+html[data-theme="glass"] .session-item.active,
+html[data-theme="paper"] .session-item.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+html[data-theme="glass"] .chat-head,
+html[data-theme="paper"] .chat-head {
+  padding-top: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+html[data-theme="glass"] .chat-head h1,
+html[data-theme="paper"] .chat-head h1 {
+  font-size: 16px;
+  font-weight: 650;
+}
+
+html[data-theme="glass"] .app[data-view="chat"]:not(.has-run) #view-chat,
+html[data-theme="paper"] .app[data-view="chat"]:not(.has-run) #view-chat {
+  background: var(--bg);
+}
+
+html[data-theme="glass"] .app[data-view="chat"]:not(.has-run) .hero,
+html[data-theme="paper"] .app[data-view="chat"]:not(.has-run) .hero {
+  padding-top: 12vh;
+}
+
+html[data-theme="glass"] .hero h2,
+html[data-theme="paper"] .hero h2 {
+  color: var(--ink);
+  font-size: 32px;
+  letter-spacing: -0.02em;
+}
+
+html[data-theme="glass"] .chat-dock,
+html[data-theme="paper"] .chat-dock {
+  background: var(--bg);
+}
+
+html[data-theme="glass"] .composer-card,
+html[data-theme="paper"] .composer-card {
+  border-radius: 14px;
+  padding: 13px 14px 10px;
+  border-color: #cbd7e0;
+}
+
+html[data-theme="glass"] .composer-card:focus-within,
+html[data-theme="paper"] .composer-card:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.14), var(--shadow);
+}
+
+html[data-theme="glass"] .send-btn,
+html[data-theme="paper"] .send-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+
+html[data-theme="glass"] .chip-select,
+html[data-theme="glass"] .chip-btn,
+html[data-theme="paper"] .chip-select,
+html[data-theme="paper"] .chip-btn {
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+html[data-theme="glass"] .scene-row button,
+html[data-theme="paper"] .scene-row button,
+html[data-theme="glass"] button.primary,
+html[data-theme="paper"] button.primary {
+  border-radius: 8px;
+}
+
+html[data-theme="glass"] #chat-sidebar,
+html[data-theme="paper"] #chat-sidebar {
+  padding: 16px 14px;
+}
+
+html[data-theme="glass"] .ctx-card,
+html[data-theme="paper"] .ctx-card {
+  border-radius: 12px;
+}
+
+html[data-theme="glass"] .settings-page-head,
+html[data-theme="paper"] .settings-page-head {
+  background: var(--panel);
+  border-bottom-color: var(--line);
+}
+
+html[data-theme="glass"] .settings-shell,
+html[data-theme="paper"] .settings-shell {
+  background: var(--bg);
+}
+
+html[data-theme="glass"] .settings-nav-col,
+html[data-theme="paper"] .settings-nav-col {
+  background: var(--bg-rail);
+  border-right-color: var(--line);
+}
+
+html[data-theme="glass"] .settings-main,
+html[data-theme="paper"] .settings-main {
+  background: var(--bg);
+}
+
+html[data-theme="glass"] #settings-nav .catalog-item.active,
+html[data-theme="paper"] #settings-nav .catalog-item.active {
+  background: var(--panel);
+  box-shadow: inset 3px 0 0 var(--accent), 0 1px 2px rgba(23, 32, 42, 0.04);
+}
+
+html[data-theme="glass"] .prompt-list,
+html[data-theme="paper"] .prompt-list {
+  background: var(--bg-rail);
+  border-right-color: var(--line);
+}
+
+html[data-theme="glass"] .prompt-editor,
+html[data-theme="paper"] .prompt-editor {
+  background: var(--panel);
+}
+
+html[data-theme="glass"] .prompt-list .catalog-fold,
+html[data-theme="paper"] .prompt-list .catalog-fold {
+  border-color: var(--line);
+  background: var(--panel);
+}
+
+html[data-theme="glass"] .prompt-list .catalog-fold[open] > summary,
+html[data-theme="paper"] .prompt-list .catalog-fold[open] > summary {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+html[data-theme="glass"] #prompt-body,
+html[data-theme="paper"] #prompt-body {
+  background: var(--panel-2);
+  border-color: var(--line);
+  border-radius: 10px;
+}
+
+html[data-theme="glass"] #view-settings .settings-card::before,
+html[data-theme="paper"] #view-settings .settings-card::before {
+  height: 2px;
+}
+
+html[data-theme="glass"] .theme-swatch[data-theme="glass"] .chips,
+html[data-theme="paper"] .theme-swatch[data-theme="glass"] .chips {
+  background: #f0f3f5;
+}
+
+html[data-theme="glass"] .theme-swatch[data-theme="glass"] .chips::before,
+html[data-theme="paper"] .theme-swatch[data-theme="glass"] .chips::before {
+  background: #dce4ea;
+}
+
+html[data-theme="glass"] .theme-swatch[data-theme="glass"] .chips::after,
+html[data-theme="paper"] .theme-swatch[data-theme="glass"] .chips::after {
+  background: #2f6fed;
+  box-shadow: 0 15px 0 -2px #c9d5df, 0 27px 0 -2px #c9d5df;
+}
+
+html[data-theme="glass"] button:focus-visible,
+html[data-theme="glass"] input:focus-visible,
+html[data-theme="glass"] textarea:focus-visible,
+html[data-theme="glass"] select:focus-visible,
+html[data-theme="paper"] button:focus-visible,
+html[data-theme="paper"] input:focus-visible,
+html[data-theme="paper"] textarea:focus-visible,
+html[data-theme="paper"] select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  html[data-theme="glass"] .new-session,
+  html[data-theme="paper"] .new-session {
+    box-shadow: none;
+  }
+
+  html[data-theme="glass"] .app[data-view="chat"]:not(.has-run) .hero,
+  html[data-theme="paper"] .app[data-view="chat"]:not(.has-run) .hero {
+    padding-top: 9vh;
+  }
+}

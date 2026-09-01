@@ -301,6 +301,11 @@ function browserClient() {
   const sendBtn = document.getElementById("send");
   const newSessionBtn = document.getElementById("new-session");
   const sessionListEl = document.getElementById("session-list");
+  const sessionFilterEl = document.getElementById("session-filter");
+  const sessionSearchPanelEl = document.getElementById("session-search-panel");
+  const sessionSearchToggleEl = document.getElementById("session-search-toggle");
+  const sessionSearchClearEl = document.getElementById("session-search-clear");
+  const sessionSearchFieldEl = document.querySelector(".task-search-field");
   const chatTitleEl = document.getElementById("chat-title");
   const chatSubEl = document.getElementById("chat-sub");
   const approvalDock = document.getElementById("approval-dock");
@@ -3080,8 +3085,33 @@ function browserClient() {
     return row;
   }
 
+  function setSessionSearchOpen(open) {
+    const expanded = Boolean(open);
+    if (sessionSearchPanelEl) {
+      sessionSearchPanelEl.hidden = !expanded;
+    }
+    if (sessionSearchToggleEl) {
+      sessionSearchToggleEl.setAttribute("aria-expanded", String(expanded));
+      sessionSearchToggleEl.classList.toggle("has-query", Boolean(sessionFilterEl && sessionFilterEl.value.trim()));
+    }
+    if (sessionSearchFieldEl) {
+      sessionSearchFieldEl.classList.toggle("has-query", Boolean(sessionFilterEl && sessionFilterEl.value.trim()));
+    }
+    if (expanded && sessionFilterEl) {
+      sessionFilterEl.focus();
+      const end = sessionFilterEl.value.length;
+      sessionFilterEl.setSelectionRange(end, end);
+    }
+  }
+
   function renderSessionList() {
-    const needle = (document.getElementById("session-filter").value || "").trim().toLowerCase();
+    const needle = (sessionFilterEl ? sessionFilterEl.value : "").trim().toLowerCase();
+    if (sessionSearchToggleEl) {
+      sessionSearchToggleEl.classList.toggle("has-query", Boolean(needle));
+    }
+    if (sessionSearchFieldEl) {
+      sessionSearchFieldEl.classList.toggle("has-query", Boolean(needle));
+    }
     const countEl = document.getElementById("session-count");
     if (countEl) {
       countEl.textContent = String(sessions.length);
@@ -7014,7 +7044,54 @@ function browserClient() {
   transcriptPort().addEventListener("scroll", () => {
     pinToBottom = isNearBottom(transcriptPort());
   });
-  document.getElementById("session-filter").addEventListener("input", renderSessionList);
+  if (sessionSearchToggleEl) {
+    sessionSearchToggleEl.addEventListener("click", () => {
+      setSessionSearchOpen(Boolean(sessionSearchPanelEl && sessionSearchPanelEl.hidden));
+    });
+  }
+  if (sessionSearchPanelEl && sessionFilterEl) {
+    sessionSearchPanelEl.addEventListener("submit", (event) => {
+      event.preventDefault();
+      renderSessionList();
+      setSessionSearchOpen(false);
+      sessionSearchToggleEl?.focus();
+    });
+    sessionFilterEl.addEventListener("input", renderSessionList);
+    sessionFilterEl.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setSessionSearchOpen(false);
+        sessionSearchToggleEl?.focus();
+      }
+    });
+    sessionFilterEl.addEventListener("focusout", () => {
+      // 键盘 Tab 离开搜索框时也收起，避免只靠鼠标点击外部才能结束搜索。
+      window.setTimeout(() => {
+        if (!sessionSearchPanelEl.hidden && !sessionSearchPanelEl.contains(document.activeElement)) {
+          setSessionSearchOpen(false);
+        }
+      }, 0);
+    });
+  }
+  if (sessionSearchClearEl && sessionFilterEl) {
+    sessionSearchClearEl.addEventListener("click", () => {
+      sessionFilterEl.value = "";
+      renderSessionList();
+      setSessionSearchOpen(false);
+      sessionSearchToggleEl?.focus();
+    });
+  }
+  document.addEventListener("pointerdown", (event) => {
+    if (
+      !sessionSearchPanelEl ||
+      sessionSearchPanelEl.hidden ||
+      sessionSearchPanelEl.contains(event.target) ||
+      sessionSearchToggleEl?.contains(event.target)
+    ) {
+      return;
+    }
+    setSessionSearchOpen(false);
+  });
   const railToggle = document.getElementById("rail-toggle");
   if (railToggle) {
     railToggle.addEventListener("click", () => setRailOpen(!railOpen));

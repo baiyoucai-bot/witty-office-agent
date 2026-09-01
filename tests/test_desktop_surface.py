@@ -116,6 +116,12 @@ class DesktopSurfaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('id="side-toggle"', html)
         self.assertIn('id="rail-toggle"', html)
         self.assertIn('class="rail-pack"', html)
+        self.assertIn('id="session-search-toggle"', html)
+        self.assertIn('id="session-search-panel"', html)
+        self.assertIn('name="session_query"', html)
+        self.assertIn("function setSessionSearchOpen", app)
+        self.assertIn('sessionSearchPanelEl.addEventListener("submit"', app)
+        self.assertIn(".task-search-toggle.has-query", css)
         self.assertIn("rail-pack", html)
         pack = html[html.find("<details class=\"rail-pack\">") : html.find("</details>")]
         self.assertIn("<summary>", pack)

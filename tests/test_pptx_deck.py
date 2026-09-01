@@ -10,6 +10,7 @@ from witty_agent.loop import READONLY_TOOLS
 from witty_agent.plan_mode import MUTATING_TOOLS
 from witty_agent.plugins.pptx import (
     pptx_add_page,
+    pptx_add_pages,
     pptx_add_slide,
     pptx_check,
     pptx_create,
@@ -278,6 +279,175 @@ class PptxDeckTests(unittest.TestCase):
         self.assertEqual([item.code for item in lint_slide(deck.slides[0], theme, 1)], [])
         macro = parse_one({"kind": "bullets", "title": "偷懒页", "items": ["一"]})
         self.assertIn("no_boxes", {item.code for item in lint_slide(macro, theme, 9)})
+
+    def test_user_supplied_logo_resolves_from_home_and_path(self) -> None:
+        """开源版包里不带企业标识，用户得能自己把标识放上去——两条路都要通：
+        `$WITTY_HOME/brand/<名字>.png` 按名字取，或者 logo 直接写文件路径。
+        深底页要的 `-white` 反白版两种写法都得找得到（路径写法要按后缀前插）。
+        裸名字仍然禁止分隔符和点开头，不然就成了任意路径读取。
+        """
+        import os
+
+        from witty_agent.plugins.pptx_kit import assets
+        from witty_agent.plugins.pptx_kit.themes import resolve_theme
+
+        def mark(path: Path, color: tuple[int, int, int]) -> None:
+            from PIL import Image
+
+            Image.new("RGB", (600, 200), color).save(path)
+
+        deck = parse_deck(
+            {
+                "title": "青绿",
+                "theme": "青绿",
+                "slides": [
+                    {"kind": "cover", "title": "数字化审计"},
+                    {
+                        "kind": "custom",
+                        "title": "要点",
+                        "boxes": [
+                            {"kind": "text", "x": 0.7, "y": 1.5, "w": 8.0, "h": 0.6, "text": "要点", "size": 28, "bold": True, "name": "witty-title"},
+                        ],
+                    },
+                ],
+            }
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            brand = root / "home" / "brand"
+            brand.mkdir(parents=True)
+            mark(brand / "acme-mark.png", (1, 112, 108))
+            mark(brand / "acme-mark-white.png", (255, 255, 255))
+            loose = root / "loose.png"
+            mark(loose, (255, 194, 10))
+            mark(root / "loose-white.png", (255, 255, 255))
+
+            previous = os.environ.get("WITTY_HOME")
+            os.environ["WITTY_HOME"] = str(root / "home")
+            assets.clear_asset_cache()
+            try:
+                # 按名字取用户目录里的图，反白版同名 -white。
+                # 期望值也要 resolve：WITTY_HOME 走 data_root() 解析过符号链接
+                # （macOS 上 /var → /private/var），比字符串会假红。
+                self.assertEqual(assets.asset_path("acme-mark"), str((brand / "acme-mark.png").resolve()))
+                self.assertEqual(assets.asset_path("acme-mark-white"), str((brand / "acme-mark-white.png").resolve()))
+                self.assertEqual(assets.asset_size("acme-mark"), (600, 200))
+                self.assertIn("acme-mark", assets.asset_names())
+                # 路径写法：反白版按后缀前插，不是拼在 .png 后面
+                self.assertEqual(assets.asset_path(str(loose)), str(loose))
+                self.assertEqual(assets.asset_path(f"{loose}-white"), str(root / "loose-white.png"))
+                # 裸名字不许带分隔符/点开头；路径写法必须是 .png 且真的存在
+                self.assertEqual(assets.asset_path("../../../etc/passwd"), "")
+                self.assertEqual(assets.asset_path(".secret"), "")
+                self.assertEqual(assets.asset_path(str(root / "nope")), "")
+                self.assertEqual(assets.asset_path(str(root / "missing.png")), "")
+
+                themed = resolve_theme("grid", {"logo": "acme-mark", "emblem": str(loose)})
+                path = str(root / "branded.pptx")
+                write_pptx(deck, path, themed)
+                from pptx import Presentation
+
+                slides = list(Presentation(path).slides)
+                # 用户底线：标识每页都在，封面另有大徽标
+                for index, slide in enumerate(slides):
+                    self.assertIn("witty-logo", {shape.name for shape in slide.shapes}, f"第 {index + 1} 页缺标识")
+                self.assertIn("witty-emblem", {shape.name for shape in slides[0].shapes})
+                # 预览是单文件，图得内联进去
+                from witty_agent.plugins.pptx_kit.preview import render_html
+
+                self.assertIn("data:image/png;base64,", render_html(deck, themed))
+            finally:
+                if previous is None:
+                    os.environ.pop("WITTY_HOME", None)
+                else:
+                    os.environ["WITTY_HOME"] = previous
+                assets.clear_asset_cache()
+
+    def test_add_pages_continues_numbering_theme_and_preview(self) -> None:
+        """长稿分块的接缝：页码/页脚接着排，主题（含用户标识）从文件里读回来不用重传，
+        预览把新页拼在末尾且旧页字节不动，自检按真实页码报而不是从 1 数。
+        """
+        import os
+
+        from witty_agent.plugins.pptx_kit import assets
+
+        def mark(path: Path) -> None:
+            from PIL import Image
+
+            Image.new("RGB", (600, 200), (1, 112, 108)).save(path)
+
+        first = {
+            "title": "数字化审计",
+            "theme": "青绿",
+            "slides": [
+                {"kind": "cover", "title": "新一代数字化审计平台"},
+                {"kind": "section", "kicker": "01", "title": "平台概览"},
+            ],
+        }
+        batch = [
+            {
+                "kind": "custom",
+                "title": "建设目标",
+                "boxes": [
+                    {"kind": "text", "x": 0.62, "y": 1.40, "w": 8.0, "h": 0.62, "text": "建设目标", "size": 28, "bold": True, "name": "witty-title"},
+                    {"kind": "bullets", "x": 0.62, "y": 2.30, "w": 11.9, "h": 3.9, "items": ["数据贯通", "模型驱动"], "name": "witty-body"},
+                ],
+            },
+            # 故意留一页宏：自检要报在第 4 页（真实页码），不能报成第 2 页
+            {"kind": "bullets", "title": "偷懒页", "items": ["一"]},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            brand = root / "home" / "brand"
+            brand.mkdir(parents=True)
+            mark(brand / "acme-mark.png")
+            previous = os.environ.get("WITTY_HOME")
+            os.environ["WITTY_HOME"] = str(root / "home")
+            assets.clear_asset_cache()
+            try:
+                path = str(root / "long.pptx")
+                pptx_render(
+                    path,
+                    deck=json.dumps(first, ensure_ascii=False),
+                    theme_overrides=json.dumps({"logo": "acme-mark"}),
+                )
+                html = Path(path).with_suffix(".html")
+                before = html.read_text(encoding="utf-8")
+                head = before[: before.rfind("</article>")]
+
+                # 第二批不传主题：标识和配色都得从文件里记的主题读回来
+                message = pptx_add_pages(path, json.dumps(batch, ensure_ascii=False))
+                self.assertIn("第 3–4 页", message)
+                self.assertIn("P4", message)
+                self.assertNotIn("P2", message)
+
+                from pptx import Presentation
+
+                pres = Presentation(path)
+                slides = list(pres.slides)
+                self.assertEqual(len(slides), 4)
+                stored = load_stored_theme(pres)
+                self.assertIsNotNone(stored)
+                self.assertEqual(stored.logo, "acme-mark")
+                for index, slide in enumerate(slides, 1):
+                    shapes = {shape.name for shape in slide.shapes}
+                    self.assertIn("witty-logo", shapes, f"第 {index} 页缺标识")
+                    page = next(shape for shape in slide.shapes if shape.name == "witty-page")
+                    self.assertEqual(page.text_frame.text, f"{index:02d}")
+                    footer = next(shape for shape in slide.shapes if shape.name == "witty-footer")
+                    self.assertTrue(footer.text_frame.text.endswith(str(index)))
+                    self.assertIn("数字化审计", footer.text_frame.text)
+
+                after = html.read_text(encoding="utf-8")
+                self.assertEqual(after.count("<section class='slide"), 4)
+                # 旧页保持字节不动：分块到第几批都不会把前面画坏
+                self.assertTrue(after.startswith(head))
+            finally:
+                if previous is None:
+                    os.environ.pop("WITTY_HOME", None)
+                else:
+                    os.environ["WITTY_HOME"] = previous
+                assets.clear_asset_cache()
 
     def test_preview_band_under_boxes_and_legacy_upgrade(self) -> None:
         """预览与成稿同模板：内容 boxes 页出白带且垫底、标识常驻；

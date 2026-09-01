@@ -17,6 +17,7 @@ from witty_agent.runtime import web_settings
 from witty_agent.tools.registry import ToolSpec, register_tool
 
 _TAVILY_ENDPOINT = "https://api.tavily.com/search"
+_ANYSEARCH_ENDPOINT = "https://api.anysearch.com/v1/search"
 
 _CHARSET_HEADER_RE = re.compile(r"""charset\s*=\s*["']?\s*([A-Za-z0-9._-]+)""", re.IGNORECASE)
 # 同时覆盖 <meta charset="..."> 和 <meta http-equiv="Content-Type" content="...; charset=...">
@@ -159,6 +160,11 @@ def _search_api_key() -> str:
     return (os.environ.get("WITTY_SEARCH_API_KEY") or os.environ.get("TAVILY_API_KEY") or "").strip()
 
 
+def _anysearch_api_key() -> str:
+    # 兼容项目通用搜索钥匙，同时优先使用 AnySearch 官方变量名。
+    return (os.environ.get("ANYSEARCH_API_KEY") or os.environ.get("WITTY_SEARCH_API_KEY") or "").strip()
+
+
 def _http_json(request: Request, timeout: int) -> dict:
     try:
         with urlopen(request, timeout=timeout) as response:  # noqa: S310 - scheme由调用方限定
@@ -202,6 +208,27 @@ def _searxng_rows(query: str, limit: int, timeout: int, base_url: str) -> list[d
     return rows[:limit]
 
 
+def _anysearch_rows(query: str, limit: int, timeout: int) -> list[dict]:
+    assert_fetchable(_ANYSEARCH_ENDPOINT)
+    payload = json.dumps({"query": query, "max_results": limit}).encode("utf-8")
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "witty-agent/web_search",
+    }
+    key = _anysearch_api_key()
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
+    request = Request(_ANYSEARCH_ENDPOINT, data=payload, headers=headers)
+    data = _http_json(request, timeout)
+    code = data.get("code")
+    if code not in (None, 0):
+        raise RuntimeError(get_prompt("web_search_failed", reason=str(data.get("message") or code)))
+    result_data = data.get("data")
+    if not isinstance(result_data, dict):
+        result_data = data
+    return [item for item in (result_data.get("results") or []) if isinstance(item, dict)][:limit]
+
+
 def web_search(query: str, max_results: int = 0) -> str:
     """网络搜索，返回标题 / 网址 / 摘要列表。provider 与 key 见 [web] 配置。"""
     text = (query or "").strip()
@@ -214,6 +241,8 @@ def web_search(query: str, max_results: int = 0) -> str:
     provider = settings["search_provider"]
     if provider == "searxng":
         rows = _searxng_rows(text, limit, timeout, str(settings["search_base_url"]))
+    elif provider == "anysearch":
+        rows = _anysearch_rows(text, limit, timeout)
     else:
         rows = _tavily_rows(text, limit, timeout)
     lines: list[str] = []

@@ -26,6 +26,7 @@ class NetPolicyTests(unittest.TestCase):
         clear_runtime_cache()
         self.assertFalse(web_settings()["deny_public"])
         self.assertEqual(web_settings()["mode"], "public")
+        self.assertEqual(web_settings()["search_provider"], "anysearch")
         self.assertTrue(host_allowed("https://example.com/x"))
         self.assertTrue(host_allowed("https://downloads.claude.ai/claude-code-releases/latest"))
         self.assertFalse(host_allowed("http://169.254.169.254/latest/meta-data"))

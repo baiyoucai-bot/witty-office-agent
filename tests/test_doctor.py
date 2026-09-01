@@ -19,6 +19,7 @@ _ENV_KEYS = (
     "OPENAI_API_KEY",
     "WITTY_SEARCH_API_KEY",
     "TAVILY_API_KEY",
+    "ANYSEARCH_API_KEY",
     "WITTY_HOME",
     "WITTY_PROMPTS_FILE",
 )
@@ -131,10 +132,19 @@ class DoctorTests(unittest.TestCase):
         os.environ.update(_GREEN_ENV)
         os.environ.pop("WITTY_SEARCH_API_KEY", None)
         self._write_scan_file("harness_system")
-        code, out = self._run()
+        with mock.patch(
+            "witty_agent.doctor.web_settings",
+            return_value={"search_provider": "tavily", "search_base_url": ""},
+        ):
+            code, out = self._run()
         self.assertEqual(code, 0)
         self.assertIn("[WARN]", out)
         self.assertIn("WITTY_SEARCH_API_KEY", out)
+
+    def test_anysearch_without_key_is_ready(self) -> None:
+        with mock.patch("witty_agent.doctor.web_settings", return_value={"search_provider": "anysearch"}):
+            result = doctor.check_web_search()
+        self.assertEqual(result.status, doctor.OK)
 
 
 if __name__ == "__main__":

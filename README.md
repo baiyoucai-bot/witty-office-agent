@@ -153,7 +153,7 @@ print(result.tools)                   # 用过的工具与结果
 | 技能 | `skills/<name>/SKILL.md` | 目录名 = frontmatter `name`，小写-连字符；`WITTY_SKILLS_PATH` 加目录 |
 | 工具 | `@tool` 装饰的函数 | `[tools].packages` 按包扫描；内核工具名不可占用 |
 | 密钥 | 环境变量 / 桌面保险柜 | `WITTY_API_KEY`（后备 `OPENAI_API_KEY`）；桌面存 vault，serve 启动时补进环境 |
-| 网络搜索 | `[web]` + 环境变量 | `web_search` 工具：默认 Tavily（`WITTY_SEARCH_API_KEY`，后备 `TAVILY_API_KEY`）；内网可改 `search_provider = "searxng"` 指自建实例，免 key |
+| 网络搜索 | `[web]` + 环境变量 | `web_search` 工具：默认 AnySearch（可匿名；认证用 `ANYSEARCH_API_KEY`）；也支持 Tavily（`WITTY_SEARCH_API_KEY`，后备 `TAVILY_API_KEY`）和自建 `searxng` |
 
 数据落点：全局 `WITTY_HOME`（默认 `~/.witty/data`，放项目、保险柜、沙箱、审批收件箱）→ 项目（租户）→ 工作区（调用方 cwd）。密钥永远不落工作区。
 

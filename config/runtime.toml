@@ -283,7 +283,8 @@ timeout_sec = 15
 # 网络搜索（web_search 工具）。provider 可选：
 #   tavily  —— 需要 key：环境变量 WITTY_SEARCH_API_KEY（后备 TAVILY_API_KEY），不要写进本文件
 #   searxng —— 自建实例，无需 key；search_base_url 指向实例根地址，适合内网部署
-search_provider = "tavily"
+#   anysearch —— 官方统一搜索 API；API key 可选，认证时用 ANYSEARCH_API_KEY
+search_provider = "anysearch"
 search_base_url = ""
 search_max_results = 5
 # 默认外网。deny_public=true 才锁公网（设置里选「内网」，或 WITTY_WEB_DENY_PUBLIC=1）

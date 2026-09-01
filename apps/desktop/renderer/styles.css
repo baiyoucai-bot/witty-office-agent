@@ -192,10 +192,10 @@ html[data-theme="glass"] {
   --bad: #d13d55;
   --warn: #b07a1e;
   --bg: transparent;
-  --bg-rail: rgba(252, 252, 255, 0.46);
-  --bg-side: rgba(252, 252, 255, 0.4);
-  --panel: rgba(255, 255, 255, 0.66);
-  --panel-2: rgba(248, 248, 255, 0.58);
+  --bg-rail: rgba(249, 249, 252, 0.84);
+  --bg-side: rgba(249, 249, 252, 0.78);
+  --panel: rgba(255, 255, 255, 0.88);
+  --panel-2: rgba(247, 247, 250, 0.9);
   --ink: #23233c;
   --fg: #23233c;
   --muted: #67678a;
@@ -211,18 +211,12 @@ html[data-theme="glass"] {
   --code: rgba(255, 255, 255, 0.58);
   --quote: #6d5efc;
   --grid: transparent;
-  --shadow: 0 14px 40px rgba(70, 60, 160, 0.15);
+  --shadow: 0 10px 28px rgba(38, 34, 76, 0.08);
 }
 
-/* 中间压一层宽幅白纱保住正文可读性，颜色只留在四角。 */
+/* 玻璃保留轻微层次，但不再用多组彩色光斑制造噪音。 */
 html[data-theme="glass"] body {
-  background:
-    radial-gradient(1200px 860px at 50% 42%, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.1) 72%),
-    radial-gradient(1000px 680px at 6% -8%, rgba(109, 94, 252, 0.42), transparent 62%),
-    radial-gradient(880px 620px at 102% -4%, rgba(56, 189, 248, 0.4), transparent 58%),
-    radial-gradient(960px 760px at 92% 104%, rgba(244, 114, 182, 0.36), transparent 62%),
-    radial-gradient(780px 600px at -4% 102%, rgba(52, 211, 153, 0.3), transparent 57%),
-    linear-gradient(160deg, #eceffc 0%, #f6f0fb 48%, #eaf3fb 100%);
+  background: linear-gradient(135deg, #f2f3f7 0%, #faf9fc 52%, #eef2f7 100%);
 }
 
 html[data-theme="glass"] .rail,
@@ -246,7 +240,7 @@ html[data-theme="glass"] #view-settings .settings-card {
 }
 
 html[data-theme="glass"] .settings-nav-col {
-  background: rgba(252, 252, 255, 0.42);
+  background: rgba(249, 249, 252, 0.78);
 }
 
 html[data-theme="glass"] .settings-main {
@@ -3226,6 +3220,70 @@ button:disabled {
   grid-template-columns: 240px minmax(0, 1fr);
 }
 
+.settings-page {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-page-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 34px 20px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 48%, transparent);
+}
+
+.settings-page-head h1 {
+  margin: 0 0 3px;
+  font-size: 22px;
+  line-height: 1.25;
+  letter-spacing: 0;
+  font-weight: 680;
+}
+
+.settings-page-head p {
+  margin: 0;
+}
+
+.settings-kicker,
+.prompt-list-kicker,
+.prompt-editor-kicker {
+  margin: 0 0 5px !important;
+  color: var(--accent);
+  font-size: 10px;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.settings-head-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  margin-top: 4px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--panel) 72%, transparent);
+  font-size: var(--fs-small);
+}
+
+.settings-head-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+
 .settings-nav-col {
   background: var(--bg-rail);
   border-right: 1px solid var(--line);
@@ -3313,10 +3371,14 @@ button:disabled {
 .settings-main {
   min-height: 0;
   overflow: auto;
-  padding: 28px 34px 48px;
+  padding: 28px clamp(24px, 4vw, 56px) 48px;
   display: flex;
   flex-direction: column;
   background: var(--bg);
+}
+
+.settings-main:not(.is-prompt) {
+  align-items: center;
 }
 
 .settings-main.is-prompt {
@@ -3326,7 +3388,9 @@ button:disabled {
 
 .prompt-split {
   display: grid;
-  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  flex: 1 1 0;
+  height: 100%;
   min-height: 0;
   overflow: hidden;
 }
@@ -3337,7 +3401,7 @@ button:disabled {
 }
 
 .prompt-list {
-  background: var(--bg);
+  background: color-mix(in srgb, var(--bg-rail) 72%, var(--bg));
   border-right: 1px solid var(--line);
   min-width: 0;
   min-height: 0;
@@ -3347,19 +3411,71 @@ button:disabled {
 }
 
 .prompt-list header {
-  padding: 16px 14px 10px;
+  padding: 22px 20px 16px;
+  border-bottom: 1px solid var(--line);
 }
 
 .prompt-list header h2 {
-  margin: 0 0 8px;
-  font-size: 16px;
+  margin: 0 0 12px;
+  font-size: 17px;
+  font-weight: 650;
 }
 
 #prompt-nav {
   flex: 1 1 0;
   min-height: 0;
   overflow: auto;
-  padding: 0 8px 16px;
+  padding: 14px 12px 22px;
+}
+
+.prompt-list .catalog-fold {
+  margin: 0 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--panel) 76%, transparent);
+}
+
+.prompt-list .catalog-fold > summary {
+  position: relative;
+  padding: 10px 12px;
+  padding-left: 30px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 620;
+}
+
+.prompt-list .catalog-fold > summary::before {
+  content: "›";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1;
+  transform: translateY(-50%);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.prompt-list .catalog-fold[open] > summary::before {
+  color: var(--accent);
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.prompt-list .catalog-fold[open] > summary {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.prompt-list .catalog-fold .catalog-item {
+  padding: 9px 12px 9px 14px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+  border-radius: 0;
+}
+
+.prompt-list .catalog-fold .catalog-item.active {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent-dim) 70%, transparent);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .prompt-editor {
@@ -3368,7 +3484,7 @@ button:disabled {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: 16px 20px 20px;
+  padding: 28px clamp(24px, 4vw, 56px) 36px;
   background: var(--panel);
 }
 
@@ -3405,14 +3521,40 @@ button:disabled {
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.prompt-head h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 680;
+}
+
+.prompt-editor-body {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 18px;
+}
+
+#prompt-status {
+  flex: 0 0 auto;
+  min-height: 19px;
+  margin: 0 0 8px;
+  font-size: var(--fs-small);
 }
 
 #prompt-body {
   flex: 1 1 0;
   min-height: 280px;
   width: 100%;
-  resize: vertical;
-  border: 0;
+  resize: none;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px 20px;
   background: var(--panel-2);
   font-family: var(--mono);
   font-size: 13px;
@@ -3423,7 +3565,7 @@ button:disabled {
   position: relative;
   overflow: hidden;
   width: 100%;
-  max-width: 780px;
+  max-width: 920px;
   margin: 0 0 20px;
   padding: 22px 26px 24px;
   border: 1px solid var(--line);
@@ -3440,7 +3582,7 @@ button:disabled {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 8%, transparent) 72%);
+  background: var(--accent);
   opacity: 0.9;
 }
 
@@ -4662,6 +4804,97 @@ label.grow {
 
   .catalog {
     grid-template-columns: 1fr;
+  }
+
+  .settings-page-head {
+    padding: 20px 24px 16px;
+  }
+
+  .settings-shell {
+    grid-template-columns: 208px minmax(0, 1fr);
+  }
+
+  .prompt-split {
+    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+  }
+
+  .prompt-editor {
+    padding: 22px 24px 28px;
+  }
+}
+
+@media (max-width: 720px) {
+  .settings-page-head {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px 18px 14px;
+  }
+
+  .settings-head-note {
+    align-self: flex-start;
+    margin-top: 0;
+  }
+
+  .settings-shell {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  .settings-nav-col {
+    flex: 0 0 auto;
+    max-height: 154px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .settings-nav-col header {
+    padding: 14px 18px 6px;
+  }
+
+  #settings-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 4px 12px 12px;
+  }
+
+  #settings-nav .catalog-item {
+    flex: 0 0 auto;
+    min-width: 116px;
+  }
+
+  .settings-main {
+    overflow: visible;
+    padding: 20px 16px 32px;
+  }
+
+  .settings-main.is-prompt {
+    overflow: visible;
+    padding: 0;
+  }
+
+  .prompt-split {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  .prompt-list {
+    flex: 0 0 auto;
+    max-height: 310px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .prompt-editor {
+    flex: 1 1 auto;
+    min-height: 480px;
+    padding: 22px 18px 28px;
+  }
+
+  .prompt-head {
+    flex-direction: column;
   }
 }
 

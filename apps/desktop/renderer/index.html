@@ -489,11 +489,23 @@
         </section>
 
         <section id="view-settings" class="view" hidden aria-label="设置">
-          <div class="settings-shell">
+          <div class="settings-page">
+            <header class="settings-page-head">
+              <div>
+                <p class="settings-kicker">工作台 / 设置</p>
+                <h1>设置中心</h1>
+                <p class="muted">把运行环境、连接方式和模型指令分开管理。</p>
+              </div>
+              <div class="settings-head-note" aria-label="设置状态">
+                <span class="settings-head-dot" aria-hidden="true"></span>
+                <span>修改后即时生效</span>
+              </div>
+            </header>
+            <div class="settings-shell">
             <aside class="settings-nav-col">
               <header>
                 <h2>设置</h2>
-                <p class="muted">外观、模型、邮件、定时和工作区。提示词单独一页。</p>
+                <p class="muted">选择一项开始编辑</p>
               </header>
               <nav id="settings-nav"></nav>
             </aside>
@@ -619,6 +631,7 @@
               <section class="prompt-split" data-panel="prompt" hidden>
                 <aside class="prompt-list">
                   <header>
+                    <div class="prompt-list-kicker">模型指令</div>
                     <h2>提示词 <span id="prompt-count" class="muted"></span></h2>
                     <input id="prompt-filter" type="search" placeholder="筛选 key 或摘要" />
                   </header>
@@ -627,6 +640,7 @@
                 <div class="prompt-editor">
                   <header class="prompt-head">
                     <div>
+                      <div class="prompt-editor-kicker">配置正文</div>
                       <h2 id="prompt-title">选择一条提示词</h2>
                       <p id="prompt-meta" class="muted">发给模型的配置。改完保存即生效，不必发版。</p>
                     </div>
@@ -635,10 +649,13 @@
                       <button id="revert-prompt" class="ghost" type="button">还原</button>
                     </div>
                   </header>
-                  <p id="prompt-status" class="muted"></p>
-                  <textarea id="prompt-body" rows="18" spellcheck="false" placeholder="从中间栏点一条提示词"></textarea>
+                  <div class="prompt-editor-body">
+                    <p id="prompt-status" class="muted" aria-live="polite"></p>
+                    <textarea id="prompt-body" rows="18" spellcheck="false" placeholder="从中间栏点一条提示词"></textarea>
+                  </div>
                 </div>
               </section>
+            </div>
             </div>
           </div>
         </section>

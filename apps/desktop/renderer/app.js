@@ -4756,7 +4756,6 @@ function browserClient() {
       buckets.get(promptGroupOf(item.name).id).push(item);
     });
     promptNavEl.replaceChildren();
-    const firstGroup = PROMPT_GROUPS.find((group) => (buckets.get(group.id) || []).length);
     PROMPT_GROUPS.forEach((group) => {
       const rows = buckets.get(group.id) || [];
       if (!rows.length) {
@@ -4766,9 +4765,7 @@ function browserClient() {
       fold.className = "catalog-fold";
       fold.dataset.group = group.id;
       fold.open = Boolean(
-        needle ||
-          rows.some((item) => item.name === currentPromptName) ||
-          (!currentPromptName && firstGroup && group.id === firstGroup.id),
+        needle || rows.some((item) => item.name === currentPromptName),
       );
       const summary = document.createElement("summary");
       summary.textContent = `${group.title} · ${rows.length}`;
@@ -4806,10 +4803,9 @@ function browserClient() {
     currentPromptName = name;
     if (settingsPanel !== "prompt") {
       showSettingsPanel("prompt");
-    } else if (promptNavEl) {
-      promptNavEl.querySelectorAll(".catalog-item").forEach((button) => {
-        button.classList.toggle("active", button.dataset.prompt === name);
-      });
+    } else {
+      // 当前项变化时重画分组，让旧分组收起、当前分组保持展开。
+      drawPromptNav();
     }
     if (promptStatusEl) {
       promptStatusEl.textContent = "读取中…";

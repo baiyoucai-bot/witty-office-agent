@@ -8,6 +8,7 @@ import json
 import os
 import re
 import threading
+import time
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -75,6 +76,7 @@ class ApiState:
         self.sessions: dict[str, Session] = {}
         self.runs: dict[str, dict[str, Any]] = {}
         self.run_lock = threading.Lock()
+        self.started_at: float | None = None
 
 
 STATE = ApiState()
@@ -600,6 +602,10 @@ async def handle_request(method: str, path: str, body: dict[str, Any] | None = N
         from witty_agent.sandbox import public_sandbox
 
         box = public_sandbox()
+        from witty_agent.daemon import read_heartbeat
+
+        now = time.time()
+        beat = read_heartbeat(STATE.root)
         return 200, {
             "ok": True,
             "version": package_version(),
@@ -608,6 +614,10 @@ async def handle_request(method: str, path: str, body: dict[str, Any] | None = N
             "active": status.get("active") or "",
             "host": {"family": host["family"], "label": host["label"], "system": host["system"]},
             "sandbox": box,
+            "pid": os.getpid(),
+            "uptime_sec": round(now - STATE.started_at, 1) if STATE.started_at else 0.0,
+            "heartbeat_age_sec": round(now - beat, 1) if beat else None,
+            "busy_runs": sum(1 for item in STATE.runs.values() if item.get("status") in _BUSY_RUN),
         }
 
     if route == "/v1/web":
@@ -1421,9 +1431,38 @@ async def handle_request(method: str, path: str, body: dict[str, Any] | None = N
         session = STATE.sessions.get(session_id)
         if session is None:
             return 404, {"error": "session not found"}
-        child = session.fork()
+        keep_raw = payload.get("keep")
+        keep = int(keep_raw) if isinstance(keep_raw, int) and not isinstance(keep_raw, bool) else None
+        child = session.fork(keep=keep, raw=bool(payload.get("raw", False)))
         STATE.sessions[child.session_id] = child
         return 200, {"session_id": child.session_id, "parent_id": session.session_id}
+
+    if method == "GET" and route.endswith("/raw") and route.startswith("/v1/sessions/"):
+        # 审计入口：原始序列（含检查点与回滚标记），只读、不投影
+        from witty_agent.store import load_raw_messages
+
+        session_id = route.split("/")[3]
+        session = STATE.sessions.get(session_id)
+        if session is None:
+            return 404, {"error": "session not found"}
+        directory = traces_dir(
+            session.agent.project.project_id, session.agent.record.agent_id, root=session.agent.root
+        )
+        rows = load_raw_messages(session_path(directory, session_id))
+        return 200, {
+            "session_id": session_id,
+            "count": len(rows),
+            "messages": [
+                {
+                    "index": index,
+                    "role": item.role,
+                    "source": item.source or "",
+                    "meta": dict(item.meta or {}),
+                    "text": (item.text() or "")[:80],
+                }
+                for index, item in enumerate(rows)
+            ],
+        }
 
     if method == "POST" and route.endswith("/steer") and route.startswith("/v1/sessions/"):
         session_id = route.split("/")[3]
@@ -1850,11 +1889,32 @@ def serve(host: str = "127.0.0.1", port: int = 8765) -> None:
         daemon=True,
         name="witty-sandbox-warm",
     ).start()
+    from witty_agent import daemon as daemon_mod
+
     server = ThreadingHTTPServer((host, port), Handler)
+    daemon_mod.write_pidfile(host, port, root=STATE.root)
+    heartbeat = daemon_mod.Heartbeat(STATE.root)
+    heartbeat.start()
+    STATE.started_at = time.time()
+
+    def _graceful(signum: int, _frame: object) -> None:
+        logger.info("收到信号 %s，停止 HTTP API", signum)
+        threading.Thread(target=server.shutdown, daemon=True).start()
+
+    import signal
+
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        try:
+            signal.signal(sig, _graceful)
+        except (ValueError, OSError):
+            # 非主线程或平台不支持时跳过；Ctrl-C 仍走 KeyboardInterrupt
+            pass
     logger.info("HTTP API %s:%s", host, port)
     try:
         server.serve_forever()
     finally:
+        heartbeat.stop()
+        daemon_mod.clear_pidfile(STATE.root)
         stop_schedule_ticker()
         stop_watcher()
 

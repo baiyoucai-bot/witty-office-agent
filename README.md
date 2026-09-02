@@ -22,7 +22,7 @@
 4. **执行有沙箱。**
    模型生成的代码写进独立工作区、跑在独立 venv（预装 numpy / pandas / matplotlib 等），不污染系统环境；文件访问有路径 jail。
 5. **上下文是工程问题。**
-   会话 jsonl 落盘可恢复；自动压缩对 prompt cache 友好（能省才裁，裁必够本）；超长工具结果落盘只留预览（spill）；会话可分叉、可回滚。
+   会话 jsonl 落盘可恢复；自动压缩对 prompt cache 友好（能省才裁，裁必够本）；超长工具结果落盘只留预览（spill）；**历史只追加**——压缩、分叉、回滚都是追加标记而非重写文件，任何一条支线都能回到压缩之前，原始记录可审计。
 
 ## 独有能力
 
@@ -89,7 +89,10 @@ export WITTY_MODEL_ID="your-model-id"
 
 uv run witty-agent          # 冒烟：加载提示词/技能/工具
 uv run witty-agent doctor   # 环境自检：模型 key/连通、提示词完整性、沙箱、搜索配置
-uv run witty-agent serve    # HTTP API，默认 127.0.0.1:8765
+uv run witty-agent serve    # HTTP API，默认 127.0.0.1:8765（前台）
+uv run witty-agent serve --daemon   # 后台运行，日志在 WITTY_HOME/serve/serve.log
+uv run witty-agent serve --status   # 活性：pid、端口、心跳是否正常（退出码 0 = 健康）
+uv run witty-agent serve --stop
 ```
 
 桌面窗口（需本机 Node / npm）：
@@ -159,16 +162,24 @@ print(result.tools)                   # 用过的工具与结果
 
 ## MCP
 
-`config/runtime.toml` 的 `[mcp].servers` 登记 stdio 服务器：
+`config/runtime.toml` 的 `[mcp].servers` 登记服务器，stdio 与 Streamable HTTP 两种传输：
 
 ```toml
 [[mcp.servers]]
 name = "files"
 command = "npx"
 args = ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
+
+[[mcp.servers]]
+name = "kb"
+url = "http://127.0.0.1:9000/mcp"
+headers = { Authorization = "Bearer replace-me" }
+trusted = true          # 确认只读的服务器才标 trusted，否则其工具默认按危险处理走审批
 ```
 
-工具以 `mcp__<server>__<tool>` 注册进循环；`tools/list_changed` 通知会触发热刷新；连不上的服务器跳过不拖启动。当前支持 stdio 传输与 tools 原语（resources / prompts / HTTP 传输在路线图）。
+工具以 `mcp__<server>__<tool>` 注册进循环。服务端声明了 `resources` / `prompts` 能力时，自动合成 `mcp__<server>__{list_resources, read_resource, list_prompts, get_prompt}` 四个工具，模型按需读资源、取提示词模板。stdio 模式接 `tools/list_changed` 热刷新；HTTP 模式不开长连接，改了工具表要重新对账。连不上的服务器跳过不拖启动。
+
+MCP 工具默认按危险处理：`always-ask` 先问、`read-only` 拒绝、计划模式拦下——外部工具写不写盘我们不知道。确认某台服务器只读后加 `trusted = true`，它的工具才当读类自动放行。
 
 ## 热插拔
 
@@ -186,7 +197,8 @@ uv run ruff check                                # lint
 
 - 沙箱是「独立工作区 + 独立解释器 + 路径 jail」，**不是** OS 级进程隔离（Seatbelt/Landlock），挡不住蓄意逃逸。
 - HTTP 服务默认只绑 `127.0.0.1` 无鉴权；要暴露给别的机器时设 `WITTY_API_TOKEN`（请求带 `Authorization: Bearer <token>`），但仍不建议直接暴露公网。
-- MCP 只有 stdio 传输；resources / prompts 原语未接。
+- MCP 的 HTTP 传输不接 `tools/list_changed` 推送（无 GET 长连接）；sampling / roots 原语未接。
+- `serve --daemon` 只做脱离终端 + pidfile + 心跳，不含崩溃自动拉起；要 7×24 请配 systemd / launchd。
 - 公网抓取 `web_fetch` 默认按配置策略放行/拒绝，内网部署可锁公网。
 - 邮件需自行配置 IMAP/SMTP 主机。
 

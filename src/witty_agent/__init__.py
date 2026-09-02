@@ -83,13 +83,43 @@ __all__ = [
 ]
 
 
+def _serve_cli(argv: list[str]) -> int:
+    """serve 子命令：前台跑 / 后台起 / 停 / 查。"""
+    import argparse
+
+    from witty_agent import daemon
+
+    parser = argparse.ArgumentParser(prog="witty-agent serve", description=get_prompt("daemon_cli_help"))
+    parser.add_argument("--host", default="127.0.0.1")
+    parser.add_argument("--port", type=int, default=8765)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--daemon", action="store_true", help=get_prompt("daemon_cli_daemon"))
+    mode.add_argument("--stop", action="store_true", help=get_prompt("daemon_cli_stop"))
+    mode.add_argument("--status", action="store_true", help=get_prompt("daemon_cli_status"))
+    mode.add_argument("--foreground", action="store_true", help=argparse.SUPPRESS)
+    args = parser.parse_args(argv)
+    if args.stop:
+        return daemon.stop()
+    if args.status:
+        state = daemon.status()
+        print(daemon.render_status(state))
+        return 0 if state.running and not state.stale else 1
+    if args.daemon:
+        return daemon.spawn_background(args.host, args.port)
+    running = daemon.status()
+    if running.running and not args.foreground:
+        print(get_prompt("daemon_already_running", pid=str(running.pid), port=str(running.port)))
+        return 1
+    serve(args.host, args.port)
+    return 0
+
+
 def main() -> None:
     import sys
 
     setup_logging()
     if len(sys.argv) > 1 and sys.argv[1] == "serve":
-        serve()
-        return
+        raise SystemExit(_serve_cli(sys.argv[2:]))
     if len(sys.argv) > 1 and sys.argv[1] == "mail-live":
         from witty_agent.plugins.mail import probe_live
 

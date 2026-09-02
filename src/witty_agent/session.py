@@ -1311,7 +1311,8 @@ class Session:
             ),
         )
 
-    def fork(self, *, keep: int | None = None, session_id: str | None = None) -> Session:
+    def fork(self, *, keep: int | None = None, session_id: str | None = None, raw: bool = False) -> Session:
+        """分叉。keep 默认按折叠后下标；raw=True 按原始下标，能落到压缩之前。"""
         new_id = session_id or uuid.uuid4().hex
         directory = traces_dir(
             self.agent.project.project_id,
@@ -1324,6 +1325,7 @@ class Session:
             new_id,
             cwd=str(self.workspace_dir),
             keep=keep,
+            raw=raw,
         )
         child = create_session(
             self.agent,

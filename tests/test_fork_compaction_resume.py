@@ -1,17 +1,15 @@
-"""摸底：压缩 × 分叉 × 恢复 三样撞在一起时，会话记录到底还剩什么。
+"""压缩 × 分叉 × 回滚 × 恢复：历史只追加（tombstone），投影按标记算。
 
-这组测试不主张现状是对的，它把现状**钉住**，好让 tombstone 改造有一条能证伪的基线。
-压缩落盘的方式已经是「只追加 + 读时投影」：检查点那条消息之后的内容才算数，之前的原始
-消息还在盘上，只是 `load_messages` 不再返回。所以「压缩会原地改写历史」这个担心是错的。
+压缩落盘一直是「只追加 + 读时投影」：检查点之后的内容才算数，之前的原始消息还在盘上。
+tombstone 改造把分叉和回滚也拉到同一条纪律上：
 
-真正的窟窿在另一处——投影只有一份，而且是有损的：
+* `rollback_session` 不再重写文件，而是追加一条回滚标记；`load_messages` 读时按文件顺序
+  逐条应用标记再折叠。默认 `keep` 仍数折叠后的列表（和用户看到的一致），`raw=True` 数原始
+  序列——能回到压缩检查点之前。
+* `fork_session` 拷的是父会话的**原始序列**，`keep` 用标记表达；子会话文件里保留原始前缀。
 
-* `fork_session(keep=n)` / `rollback_session(keep=n)` 的 n 数的是**折叠后**的列表，
-  于是检查点之前的任何一条都不可寻址。压缩过的会话没法分叉回压缩之前。
-* `rollback_session` 会整份重写文件，盘上那段原始前缀就此永久消失。分叉出去的子会话
-  文件里也只有折叠后的那几条，连盘上都没有原始前缀。
-
-下面每条测试对应上面一条事实。改造 tombstone 时它们要么继续过，要么带着理由一起改。
+于是「分叉回压缩之前」「回滚不丢历史」「子会话可审计」三件事都成立。原先钉住旧行为的
+几条断言在这里翻转成新契约，并带着理由。
 """
 
 from __future__ import annotations
@@ -23,7 +21,14 @@ from pathlib import Path
 
 from witty_agent.compaction import COMPACTION_CHECKPOINT_SOURCE
 from witty_agent.session_tree import fork_session, list_session_ids, read_parent, rollback_session
-from witty_agent.store import append_message, load_messages, session_path, write_header
+from witty_agent.store import (
+    ROLLBACK_MARKER_SOURCE,
+    append_message,
+    load_messages,
+    load_raw_messages,
+    session_path,
+    write_header,
+)
 from witty_agent.types import AgentMessage
 
 
@@ -102,7 +107,7 @@ class CompactionIsAProjectionTests(SessionFileBase):
 
 
 class ForkAfterCompactionTests(SessionFileBase):
-    """分叉是拿折叠后的视图去建新文件，所以压缩之前的历史对子会话不存在。"""
+    """分叉拷原始序列：子会话看到的投影与父一致，盘上却一条历史不少。"""
 
     def make_compacted(self) -> Path:
         path = self.build("parent", [msg("user", "old-1"), msg("assistant", "old-2")])
@@ -110,38 +115,41 @@ class ForkAfterCompactionTests(SessionFileBase):
             append_message(path, message)
         return path
 
-    def test_fork_inherits_only_the_projection(self) -> None:
+    def test_fork_inherits_the_projection(self) -> None:
         self.make_compacted()
         forked = fork_session(self.root, "parent", "child", cwd=str(self.root))
         self.assertEqual(texts(forked), ["summary so far", "new-1", "new-2"])
 
-    def test_the_child_file_has_no_raw_prefix_even_on_disk(self) -> None:
-        """父会话盘上还留着 old-1/old-2，子会话文件里连盘上都没有。
-
-        这是「投影有损」最硬的一处：分叉一次，压缩前的原始记录就在这条支线上彻底没了。
-        """
+    def test_the_child_file_keeps_the_raw_prefix_on_disk(self) -> None:
+        """翻转：子会话文件里保留 old-1/old-2。分叉不再是有损投影，支线可审计、可再回溯。"""
         self.make_compacted()
         fork_session(self.root, "parent", "child", cwd=str(self.root))
         child_rows = self.raw_message_texts(session_path(self.root, "child"))
-        self.assertNotIn("old-1", child_rows)
-        self.assertIn("old-1", self.raw_message_texts(session_path(self.root, "parent")))
+        self.assertIn("old-1", child_rows)
+        self.assertEqual(texts(load_messages(session_path(self.root, "child"))), ["summary so far", "new-1", "new-2"])
 
-    def test_keep_indexes_the_folded_list_not_the_file(self) -> None:
-        """keep=1 留下的是折叠后的第一条（摘要），不是文件里的第一条（old-1）。"""
+    def test_keep_indexes_the_folded_list_by_default(self) -> None:
+        """keep=1 留下的是折叠后的第一条（摘要）——默认语义与用户看到的列表对齐，没变。"""
         self.make_compacted()
         forked = fork_session(self.root, "parent", "child", cwd=str(self.root), keep=1)
         self.assertEqual(texts(forked), ["summary so far"])
+        # 但盘上原始前缀仍在，keep 是靠标记表达的
+        child_raw = load_raw_messages(session_path(self.root, "child"))
+        self.assertIn("old-1", texts(child_raw))
+        self.assertEqual(child_raw[-1].source, ROLLBACK_MARKER_SOURCE)
 
-    def test_cannot_fork_back_to_before_the_checkpoint(self) -> None:
-        """现状记账：压缩之前的任何一条都不可寻址，keep 再大也回不去。
-
-        tombstone 改造要动的就是这一条——要让分叉能落在压缩之前，就得让检查点变成可跨越
-        的标记，而不是读取下界。
-        """
+    def test_folded_keep_beyond_window_does_not_resurrect_the_prefix(self) -> None:
+        """默认语义下 keep 再大也只是「全留」，不会把压缩前的 old-1 顺手捞回来。"""
         self.make_compacted()
         forked = fork_session(self.root, "parent", "child", cwd=str(self.root), keep=99)
-        self.assertNotIn("old-1", texts(forked))
-        self.assertEqual(len(forked), 3)
+        self.assertEqual(texts(forked), ["summary so far", "new-1", "new-2"])
+
+    def test_raw_keep_can_fork_back_to_before_the_checkpoint(self) -> None:
+        """翻转：raw=True 按原始下标截，检查点之前的消息重新可寻址。"""
+        self.make_compacted()
+        forked = fork_session(self.root, "parent", "child", cwd=str(self.root), keep=2, raw=True)
+        self.assertEqual(texts(forked), ["old-1", "old-2"])
+        self.assertEqual(self.raw_message_texts(session_path(self.root, "child")), ["old-1", "old-2"])
 
     def test_fork_records_the_parent(self) -> None:
         self.make_compacted()
@@ -158,7 +166,7 @@ class ForkAfterCompactionTests(SessionFileBase):
 
 
 class RollbackAfterCompactionTests(SessionFileBase):
-    """回滚是原地重写，它会把盘上那段原始前缀真删掉——压缩本身不会。"""
+    """回滚是追加一条标记：盘上历史一条不少，投影按标记算。"""
 
     def make_compacted(self) -> Path:
         path = self.build("s1", [msg("user", "old-1"), msg("assistant", "old-2")])
@@ -166,11 +174,18 @@ class RollbackAfterCompactionTests(SessionFileBase):
             append_message(path, message)
         return path
 
-    def test_rollback_destroys_the_raw_prefix(self) -> None:
+    def test_rollback_appends_a_marker_and_keeps_the_raw_prefix(self) -> None:
+        """翻转：回滚不再重写文件。原始前缀、被回滚掉的消息都还在盘上，只是不进投影。"""
         path = self.make_compacted()
-        self.assertIn("old-1", self.raw_message_texts(path))
+        before = self.raw_message_texts(path)
         rollback_session(self.root, "s1", keep=2)
-        self.assertNotIn("old-1", self.raw_message_texts(path))
+        after = self.raw_message_texts(path)
+        self.assertEqual(after[: len(before)], before)
+        self.assertIn("old-1", after)
+        self.assertIn("new-2", after, "被回滚掉的 new-2 仍在盘上")
+        rows = self.raw_rows(path)
+        self.assertEqual(rows[-1]["source"], ROLLBACK_MARKER_SOURCE)
+        self.assertEqual(rows[-1]["meta"], {"keep": 2, "raw": False})
 
     def test_rollback_keeps_the_folded_head(self) -> None:
         path = self.make_compacted()
@@ -185,15 +200,48 @@ class RollbackAfterCompactionTests(SessionFileBase):
         rollback_session(self.root, "s1", keep=1)
         self.assertEqual(read_parent(session_path(self.root, "s1")), "root")
 
-    def test_rollback_past_the_checkpoint_cannot_reach_the_original(self) -> None:
-        """keep=0 之后会话是空的，而不是回到压缩前的 old-1/old-2。
-
-        也就是说压缩之后，回滚只能在摘要之后的那一小段里挑位置。这条和分叉那条同源，
-        改造时一起看。
-        """
+    def test_folded_rollback_to_zero_is_empty_not_the_original(self) -> None:
+        """默认语义 keep=0 = 空会话（与用户看到的列表一致），不会偷偷回到压缩前。"""
         path = self.make_compacted()
         self.assertEqual(rollback_session(self.root, "s1", keep=0), [])
         self.assertEqual(load_messages(path), [])
+        self.assertIn("old-1", self.raw_message_texts(path), "空的只是投影，历史还在")
+
+    def test_raw_rollback_reaches_before_the_checkpoint(self) -> None:
+        """翻转：raw=True 按原始下标回滚，检查点被截掉，压缩前的 old-1/old-2 重新成为可见会话。"""
+        path = self.make_compacted()
+        kept = rollback_session(self.root, "s1", keep=2, raw=True)
+        self.assertEqual(texts(kept), ["old-1", "old-2"])
+        self.assertEqual(texts(load_messages(path)), ["old-1", "old-2"])
+        self.assertIn("summary so far", self.raw_message_texts(path), "检查点仍在盘上，只是不再生效")
+
+    def test_appending_after_rollback_continues_from_the_kept_head(self) -> None:
+        path = self.make_compacted()
+        rollback_session(self.root, "s1", keep=1)
+        append_message(path, msg("user", "again"))
+        self.assertEqual(texts(load_messages(path)), ["summary so far", "again"])
+
+    def test_multiple_rollbacks_apply_in_file_order(self) -> None:
+        """两次回滚逐条应用：第二次的 keep 数的是第一次回滚之后（含后续追加）的列表。"""
+        path = self.build("s1", [msg("user", "a"), msg("assistant", "b"), msg("user", "c")])
+        rollback_session(self.root, "s1", keep=2)  # [a, b]
+        append_message(path, msg("assistant", "d"))  # [a, b, d]
+        kept = rollback_session(self.root, "s1", keep=1)  # [a]
+        self.assertEqual(texts(kept), ["a"])
+        append_message(path, msg("assistant", "e"))
+        self.assertEqual(texts(load_messages(path)), ["a", "e"])
+        self.assertEqual(
+            self.raw_message_texts(path),
+            ["a", "b", "c", "", "d", "", "e"],
+            "七条原始记录（含两条空正文的标记）一条都没删",
+        )
+
+    def test_fork_of_a_rolled_back_session_inherits_the_marker(self) -> None:
+        path = self.make_compacted()
+        rollback_session(self.root, "s1", keep=2)
+        forked = fork_session(self.root, "s1", "child", cwd=str(self.root))
+        self.assertEqual(texts(forked), ["summary so far", "new-1"])
+        self.assertEqual(len(load_raw_messages(session_path(self.root, "child"))), len(load_raw_messages(path)))
 
 
 class ResumeAfterCompactionTests(SessionFileBase):

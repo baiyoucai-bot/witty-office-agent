@@ -309,4 +309,22 @@ max_list = 20
 max_body_chars = 8000
 
 [mcp]
+# 两种传输：stdio（command/args 起子进程）或 Streamable HTTP（url，可带 headers 鉴权）。
+# 工具名 mcp__<server>__<tool>；服务端声明了 resources / prompts 能力时，另合成
+# mcp__<server>__{list_resources,read_resource,list_prompts,get_prompt} 四个工具。
+# HTTP 模式不开长连接，收不到 tools/list_changed 推送；改了工具表要重新对账（reload）。
+# MCP 工具默认按危险处理（always-ask 先问、read-only 拒绝、计划模式拦下）：
+# 外部工具写不写盘我们不知道。确认某台服务器只读，再加 trusted = true 让它当读类放行。
+# 密钥别写进本文件：需要鉴权的 HTTP 服务器把 token 交给本机代理或网关。
+timeout_sec = 30
 servers = []
+# [[mcp.servers]]
+# name = "files"
+# command = "npx"
+# args = ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
+# trusted = false
+# [[mcp.servers]]
+# name = "kb"
+# url = "http://127.0.0.1:9000/mcp"
+# headers = { Authorization = "Bearer replace-me" }
+# trusted = true

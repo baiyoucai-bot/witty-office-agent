@@ -166,6 +166,47 @@ def append_message(path: Path, message: AgentMessage) -> None:
         fh.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
+ROLLBACK_MARKER_SOURCE = "plugin:rollback-marker"
+
+
+def rollback_marker(keep: int, *, raw: bool) -> AgentMessage:
+    """回滚标记：只追加，永不重写历史（tombstone）。
+
+    `raw=False`：keep 数的是**折叠后**的列表——和用户在界面上看到的一致；
+    `raw=True`：keep 数的是原始序列——能回到压缩检查点之前。
+    """
+    return AgentMessage(
+        role="user",
+        content="",
+        source=ROLLBACK_MARKER_SOURCE,
+        meta={"keep": int(max(0, keep)), "raw": bool(raw)},
+    )
+
+
+def project_messages(raw_messages: list[AgentMessage]) -> list[AgentMessage]:
+    """原始序列 → 可见投影。历史只追加，读的时候按标记算。
+
+    按文件顺序逐条应用回滚标记：`raw=True` 的标记把「到此为止累计的原始序列」截到 keep 条；
+    `raw=False` 的标记把「到此为止的折叠视图」截到 keep 条（折叠视图之外的前缀就此不可见，
+    与用户当时看到的列表一致，不会把压缩前的旧消息顺手捞回来）。标记本身不进投影。
+    最后再做一次压缩检查点折叠。返回列表里的对象与输入同一身份（不复制），
+    调用方可以用 id() 把投影下标映射回原始下标。
+    """
+    current: list[AgentMessage] = []
+    for message in raw_messages:
+        if message.source == ROLLBACK_MARKER_SOURCE:
+            meta = message.meta or {}
+            try:
+                keep = max(0, int(meta.get("keep") or 0))
+            except (TypeError, ValueError):
+                keep = 0
+            base = current if meta.get("raw") else fold_compaction_checkpoint(current)
+            current = list(base[:keep])
+            continue
+        current.append(message)
+    return fold_compaction_checkpoint(current)
+
+
 def fold_compaction_checkpoint(messages: list[AgentMessage]) -> list[AgentMessage]:
     """压缩检查点：从最近一次检查点起读。区间压缩可保留检查点前 keep_before 条。"""
     last = -1
@@ -184,7 +225,13 @@ def fold_compaction_checkpoint(messages: list[AgentMessage]) -> list[AgentMessag
     return messages[begin:]
 
 
-def load_messages(path: Path) -> list[AgentMessage]:
+def load_raw_messages(path: Path) -> list[AgentMessage]:
+    """文件里全部 message 记录，含压缩检查点与回滚标记，不做任何投影。"""
+    return load_messages(path, fold=False)
+
+
+def load_messages(path: Path, *, fold: bool = True) -> list[AgentMessage]:
+    """读会话消息。默认返回投影（应用回滚标记 + 压缩折叠）；fold=False 返回原始序列。"""
     if not path.is_file():
         return []
     messages: list[AgentMessage] = []
@@ -209,7 +256,9 @@ def load_messages(path: Path) -> list[AgentMessage]:
                 meta=dict(data.get("meta") or {}) if isinstance(data.get("meta"), dict) else {},
             )
         )
-    folded = fold_compaction_checkpoint(messages)
+    if not fold:
+        return messages
+    folded = project_messages(messages)
     logger.info("恢复会话 messages=%s folded=%s path=%s", len(messages), len(folded), path)
     return folded
 
